@@ -1,19 +1,24 @@
 import {useState} from "react";
-import {Alert, Button, TextField} from "@mui/material";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Alert from "@mui/material/Alert";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import {FaCaretDown} from "react-icons/fa";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import InputLabel from "@mui/material/InputLabel";
 import Input from "@mui/material/Input";
 import InputAdornment from "@mui/material/InputAdornment";
+import {FaCaretDown} from "react-icons/fa";
 import { FaSteamSymbol } from "react-icons/fa";
-
+import { useNavigate } from "react-router-dom";
+import {useSteamFormInput} from "../hooks/useSteamFormInput.js";
 
 export default function SubmitGame() {
+
     const [gameId, setGameId] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+
     const [steamData, setSteamData] = useState({
         appId: "",
         name: "",
@@ -31,38 +36,14 @@ export default function SubmitGame() {
         steamUrl: ""
     });
 
-    const handleChange = (e, index=null) => {
-        if (e.target.type === 'text' || e.target.type === 'number' || e.target.id === 'shortDescription' || e.target.id === 'description') {
-            setSteamData({
-                ...steamData,
-                [e.target.id]: e.target.value,
-            })
-        }
-        if (e.target.id === `genre-${index}`){
-            const newGenre = [...steamData.genres]
-            newGenre[index] = e.target.value
-            setSteamData({...steamData, genres: newGenre})
-            console.log(steamData.genres);
-        }
-        if (e.target.id === `dev-${index}`){
-            const newDevs = [...steamData.devs]
-            newDevs[index] = e.target.value
-            setSteamData({...steamData, devs: newDevs})
-            console.log(steamData.devs);
-        }
-        if (e.target.id === `pub-${index}`){
-            const newPubs = [...steamData.pubs]
-            newPubs[index] = e.target.value
-            setSteamData({...steamData, pubs: newPubs})
-            console.log(steamData.pubs);
-        }
-    };
+    const navigate = useNavigate();
+    const handleChange = useSteamFormInput(steamData, setSteamData);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:8080/game/add`, {
+            const res = await fetch(`/api/game/add`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(steamData),
@@ -70,7 +51,7 @@ export default function SubmitGame() {
             const data = await res.json();
             if (data) {
                 console.log(data);
-                alert('game added successfully!');
+                alert('Game Added Successfully!');
             } else {
                 console.log('Error in fetching data', data.message);
                 setError(`Error in fetching data: ${data.message}`);
@@ -81,6 +62,7 @@ export default function SubmitGame() {
             setError(`Error encountered while creating game: ${error}`);
         } finally {
             setLoading(false);
+            navigate('/');
         }
 
     };
@@ -96,7 +78,7 @@ export default function SubmitGame() {
         setError(null);
         if (gameId){
             try {
-                const res = await fetch(`http://localhost:8080/steam/get/${gameId}`)
+                const res = await fetch(`/api/steam/get/${gameId}`)
                 if (!res.ok){
                     setError(`Error in getting response: ${res.statusText}`);
                     return;
@@ -173,7 +155,7 @@ export default function SubmitGame() {
                                     required
                                     id="name"
                                     label="Name"
-                                    defaultValue="name"
+                                    // defaultValue="name"
                                     variant="standard"
                                     value={steamData.name}
                                     onChange={handleChange}
@@ -184,7 +166,7 @@ export default function SubmitGame() {
                                     required
                                     id="steamUrl"
                                     label="Steam Url"
-                                    defaultValue="https://store.steam.com"
+                                    // defaultValue="https://store.steam.com"
                                     variant="standard"
                                     value={steamData.steamUrl}
                                     onChange={handleChange}
@@ -205,7 +187,7 @@ export default function SubmitGame() {
                                         required
                                         id="description"
                                         label="Description"
-                                        defaultValue="description...."
+                                        // defaultValue="description...."
                                         variant="standard"
                                         value={steamData.description}
                                         onChange={handleChange}
@@ -218,7 +200,7 @@ export default function SubmitGame() {
                                         required
                                         id="shortDescription"
                                         label="Short Description"
-                                        defaultValue="short description...."
+                                        // defaultValue="short description...."
                                         variant="standard"
                                         value={steamData.shortDescription}
                                         onChange={handleChange}
@@ -240,7 +222,7 @@ export default function SubmitGame() {
                                     <TextField
                                         id="website"
                                         label="Website"
-                                        defaultValue="https://store.steam.com"
+                                        // defaultValue="https://store.steam.com"
                                         variant="standard"
                                         value={steamData.website}
                                         onChange={handleChange}
@@ -255,7 +237,7 @@ export default function SubmitGame() {
                                                     required
                                                     key={index}
                                                     id={`genre-${index}`}
-                                                    defaultValue="genre"
+                                                    // defaultValue="genre"
                                                     variant="standard"
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
@@ -284,7 +266,7 @@ export default function SubmitGame() {
                                                     required
                                                     key={index}
                                                     id={`dev-${index}`}
-                                                    defaultValue="dev"
+                                                    // defaultValue="dev"
                                                     variant="standard"
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
@@ -302,7 +284,7 @@ export default function SubmitGame() {
                                                     fullWidth
                                                     key={index}
                                                     id={`pub-${index}`}
-                                                    defaultValue="dev"
+                                                    // defaultValue="dev"
                                                     variant="standard"
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
@@ -325,15 +307,21 @@ export default function SubmitGame() {
                                 <AccordionDetails className="flex flex-col gap-5">
                                     <InputLabel htmlFor="screenshots">Screenshots</InputLabel>
                                     <div className="flex flex-row gap-3 flex-wrap">
-                                        {steamData.screenshots && steamData.screenshots.map(screenshot => (
-                                            <img src={screenshot} alt="" className="w-1/4 h-auto cursor-pointer transition-transform hover:scale-105"/>
+                                        {steamData.screenshots && steamData.screenshots.map((screenshot, index) => (
+                                            <div key={index} className="w-1/4 h-auto cursor-pointer transition-transform hover:scale-105">
+                                                <img src={screenshot} alt="" />
+                                            </div>
+
                                         ))}
                                     </div>
 
                                     <InputLabel htmlFor="trailers">Trailers</InputLabel>
                                     <div className="flex flex-row flex-wrap gap-2">
                                         {steamData.trailer && steamData.trailer.map((item, index) => (
-                                            <video poster={item.thumbnail} className="w-1/3 h-auto" src={item.trailer} controls title={item.name}/>
+                                            <div key={index} className="w-1/3 h-auto">
+                                                <video poster={item.thumbnail}  src={item.trailer} controls title={item.name}/>
+                                            </div>
+
                                         ))}
                                     </div>
                                 </AccordionDetails>

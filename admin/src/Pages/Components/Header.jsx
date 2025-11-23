@@ -9,7 +9,6 @@ export default function Header() {
 
             <nav className="flex gap-3">
                 <Link to={'/submit'}>Submit Game</Link>
-                <Link to={'/all'}>Show Games</Link>
             </nav>
         </div>
     )

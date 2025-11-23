@@ -1,18 +1,18 @@
 import {useState, useEffect} from "react";
-import {Link} from "react-router-dom";
-import { IoIosCloseCircle } from "react-icons/io";
-import { GoLinkExternal } from "react-icons/go";
 import {useParams} from "react-router-dom";
-import {Button, TextField} from "@mui/material";
+import {Button, TextField, ButtonGroup} from "@mui/material";
 import Input from '@mui/material/Input';
 import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
+import Alert from '@mui/material/Alert'
 import { FaCaretDown } from "react-icons/fa";
-
-
+import { useNavigate } from 'react-router-dom';
+import UniversalDialog from './Components/UniversalDialog.jsx';
+import {useSteamFormInput} from "../hooks/useSteamFormInput.js";
+import {useDeleteMedia} from "../hooks/useDeleteMedia.js";
 
 export default function Editor() {
     const [gameId, setGameId] = useState(null);
@@ -37,6 +37,7 @@ export default function Editor() {
 
 
     const params = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         setLoading(true);
@@ -45,7 +46,7 @@ export default function Editor() {
             if (params.id) {
                 try {
                     console.log('gameid is', gameId);
-                    const res = await fetch(`http://localhost:8080/game/fetch/${params.id}`);
+                    const res = await fetch(`/api/game/fetch/${params.id}`);
                     if (res.ok){
                         const data = await res.json();
                         console.log(data);
@@ -69,7 +70,7 @@ export default function Editor() {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:8080/game/update/${params.id}`, {
+            const res = await fetch(`/api/game/update/${params.id}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(steamData),
@@ -77,7 +78,7 @@ export default function Editor() {
             const data = await res.json();
             if (data) {
                 console.log(steamData);
-                alert('game updated successfully!');
+                alert('Game Updated Successfully!');
             } else {
                 console.log('Error in updating data', data.message);
                 setError(`Error in updating data: ${data.message}`);
@@ -89,43 +90,128 @@ export default function Editor() {
         } finally {
             setLoading(false);
         }
+    };
+
+
+    const handleChange = useSteamFormInput(steamData, setSteamData);
+
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogTitle, setDialogTitle] = useState(null);
+    const [dialogContent, setDialogContent] = useState(null);
+    const [onAgreeHandler, setOnAgreeHandler] = useState(() => () => {});
+    const [mxWidth, setMxWidth] = useState("sm")
+
+
+    // Delete Entry
+    const handleDelete = async (e) => {
+        e.preventDefault();
+        console.log('open the dialog for confirm delete the entry')
+        setDialogTitle('Confirm Delete?');
+        setDialogContent("Are you sure you want to delete this entry? This can't be undo, but you can re-enter the entry using its steam ID.");
+        setDialogOpen(true);
+        setLoading(true);
+
+        setOnAgreeHandler(() => async ()  => {
+            try {
+                const res = await fetch(`/api/game/delete/${params.id}`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(steamData),
+                });
+                const data = await res.json();
+                if (data) {
+                    console.log(steamData);
+                    setDialogOpen(false);
+                } else {
+                    console.log('Error in deleting entry', data.message);
+                    setError(`Error in deleting entry: ${data.message}`);
+                }
+
+            } catch (error) {
+                console.log('Error encountered while deleting game', error);
+                setError(`Error encountered while deleting game: ${error}`);
+            }
+        finally {
+            setLoading(false);
+            navigate('/');
+        }
+        })
 
     };
 
-    const handleChange = (e, index=null) => {
-        if (e.target.type === 'text' || e.target.type === 'number' || e.target.id === 'shortDescription' || e.target.id === 'description') {
-            setSteamData({
-                ...steamData,
-                [e.target.id]: e.target.value,
+    // Produce dialog to confirm deletion of individual screenshot or trailer
+    const handleDeleteHook = useDeleteMedia(steamData, setError, setSteamData)
+    const handleDeleteMedia = (index, mediaType) => {
+            setDialogTitle('Confirm Delete?');
+            setDialogContent(`Are you sure you want to delete this ${mediaType}? This can't be undo.`);
+            setDialogOpen(true);
+            setMxWidth("xs")
+            if (steamData[mediaType].length === 1) {
+                setError(`Can not proceed with removing ${mediaType}, this is the last one!`);
+                return 0
+            }
+            setOnAgreeHandler(() => ()  => {
+                handleDeleteHook(mediaType, index);
+                setDialogOpen(false);
             })
         }
-        if (e.target.id === `genre-${index}`){
-            const newGenre = [...steamData.genres]
-            newGenre[index] = e.target.value
-            setSteamData({...steamData, genres: newGenre})
-            console.log(steamData.genres);
+
+
+    const handleAddScreenshot = (e) => {
+        const screenshotUrl = prompt('Add a screenshot URL');
+        if (!screenshotUrl) {
+            return 0;
         }
-        if (e.target.id === `dev-${index}`){
-            const newDevs = [...steamData.devs]
-            newDevs[index] = e.target.value
-            setSteamData({...steamData, devs: newDevs})
-            console.log(steamData.devs);
+        try{
+            setSteamData(prev =>({
+                ...prev,
+                screenshots:[...(prev.screenshots || []), screenshotUrl]
+            }))
+        } catch (e){
+            console.log('something happened', e.message);
         }
-        if (e.target.id === `pub-${index}`){
-            const newPubs = [...steamData.pubs]
-            newPubs[index] = e.target.value
-            setSteamData({...steamData, pubs: newPubs})
-            console.log(steamData.pubs);
+    }
+
+    const handleAddTrailer = (e) => {
+        e.preventDefault();
+        const trailerVidId = prompt('Please provide youtube video ID');
+        if (!trailerVidId){
+            return 0;
         }
-    };
+        console.log('thank you for providing the url', trailerVidId);
+        const newTrailer = {
+            name: 'new trailer',
+            thumbnail:`https://img.youtube.com/vi/${trailerVidId}/hqdefault.jpg`,
+            trailer: `https://www.youtube.com/watch?v=${trailerVidId}`
+        }
+        try {
+            setSteamData(prev=> ({
+                ...prev,
+                trailer:[...(prev.trailer || []), newTrailer]
+            }))
+        } catch (e){
+            console.log('error is', e)
+        }
+    }
 
     return (
         <div className="max-w-lg mx-auto my-5">
-            {loading ? "Loading...." : ""}
-            {error && (
-                <p>{error}</p>
-            )}
 
+            <UniversalDialog
+                open={dialogOpen}
+                title={dialogTitle}
+                content={dialogContent}
+                onClose={() => setDialogOpen(false)}
+                onAgree={onAgreeHandler}
+                width = {mxWidth}
+            />
+            {loading ? "Loading...." : ""}
+            <div className="my-4">
+                {error && (
+                    <Alert severity="error">{error}</Alert>
+                )}
+
+            </div>
                 { steamData && (
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-wrap">
                         <div  className="flex flex-col gap-4 w-2xl">
@@ -135,7 +221,7 @@ export default function Editor() {
                                     required
                                     id="name"
                                     label="Name"
-                                    defaultValue="name"
+                                    // defaultValue="name"
                                     variant="standard"
                                     value={steamData.name}
                                     onChange={handleChange}
@@ -146,7 +232,7 @@ export default function Editor() {
                                     required
                                     id="steamUrl"
                                     label="Steam Url"
-                                    defaultValue="https://store.steam.com"
+                                    // defaultValue="https://store.steam.com"
                                     variant="standard"
                                     value={steamData.steamUrl}
                                     onChange={handleChange}
@@ -167,7 +253,7 @@ export default function Editor() {
                                         required
                                         id="description"
                                         label="Description"
-                                        defaultValue="description...."
+                                        // defaultValue="description...."
                                         variant="standard"
                                         value={steamData.description}
                                         onChange={handleChange}
@@ -180,7 +266,7 @@ export default function Editor() {
                                         required
                                         id="shortDescription"
                                         label="Short Description"
-                                        defaultValue="short description...."
+                                        // defaultValue="short description...."
                                         variant="standard"
                                         value={steamData.shortDescription}
                                         onChange={handleChange}
@@ -202,7 +288,7 @@ export default function Editor() {
                                     <TextField
                                         id="website"
                                         label="Website"
-                                        defaultValue="https://store.steam.com"
+                                        // defaultValue="https://store.steam.com"
                                         variant="standard"
                                         value={steamData.website}
                                         onChange={handleChange}
@@ -213,16 +299,17 @@ export default function Editor() {
                                         <InputLabel htmlFor="genres">Genres</InputLabel>
                                         <div className="p-2 bg-slate-200 flex flex-col gap-2">
                                             {steamData.genres && steamData.genres.map((item, index) => (
+                                                <span key={index}>
                                                 <TextField
                                                     required
                                                     key={index}
                                                     id={`genre-${index}`}
-                                                    defaultValue="genre"
+                                                    // defaultValue="genre"
                                                     variant="standard"
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
-
                                                 />
+                                                </span>
                                             ))}
                                         </div>
                                     </div>
@@ -246,11 +333,10 @@ export default function Editor() {
                                                     required
                                                     key={index}
                                                     id={`dev-${index}`}
-                                                    defaultValue="dev"
+                                                    // defaultValue="dev"
                                                     variant="standard"
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
-
                                                 />
                                             ))}
                                         </div>
@@ -264,18 +350,14 @@ export default function Editor() {
                                                     fullWidth
                                                     key={index}
                                                     id={`pub-${index}`}
-                                                    defaultValue="dev"
+                                                    // defaultValue="dev"
                                                     variant="standard"
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
-
                                                 />
                                             ))}
                                         </div>
-
                                     </div>
-
-
                                 </AccordionDetails>
                             </Accordion>
                             <Accordion>
@@ -287,17 +369,35 @@ export default function Editor() {
                                 <AccordionDetails className="flex flex-col gap-5">
                                     <InputLabel htmlFor="screenshots">Screenshots</InputLabel>
                                     <div className="flex flex-row gap-3 flex-wrap">
-                                        {steamData.screenshots && steamData.screenshots.map(screenshot => (
-                                            <img src={screenshot} alt="" className="w-1/4 h-auto cursor-pointer transition-transform hover:scale-105"/>
+                                        {steamData.screenshots.length === 0 &&(
+                                            <p>No screenshots are available.</p>
+                                        )}
+                                        {steamData.screenshots && steamData.screenshots.map((screenshot, index) => (
+                                            <div key={index}  className="w-1/4 h-auto cursor-pointer transition-transform hover:scale-105 relative">
+                                                <img src={screenshot} alt=""/>
+                                                <button
+                                                    className="absolute top-1 right-1 bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 flex items-center justify-center cursor-pointer"
+                                                    type="button" onClick={() => handleDeleteMedia(index, "screenshots")}  title="Delete this screenshot">
+                                                    &times;
+                                                </button>
+                                            </div>
                                         ))}
                                     </div>
-
+                                    <Button onClick={handleAddScreenshot} type="button" variant="contained">Add New Screenshot</Button>
                                     <InputLabel htmlFor="trailers">Trailers</InputLabel>
-                                    <div className="flex flex-row flex-wrap gap-2">
-                                        {steamData.trailer && steamData.trailer.map((item, index) => (
-                                            <video poster={item.thumbnail} className="w-1/3 h-auto" src={item.trailer} controls title={item.name}/>
+                                    <div className="flex flex-col flex-wrap gap-2 max-w-full">
+                                        {steamData.trailer && steamData.trailer.map((item,index) => (
+                                            <div className="w-1/3 h-auto relative" key={index}>
+                                                <video poster={item.thumbnail}  src={item.trailer} controls title={item.name}/>
+                                                <button
+                                                    className="absolute top-1 right-1 bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 flex items-center justify-center cursor-pointer"
+                                                    type="button" onClick={() => handleDeleteMedia(index, "trailer")}  title="Delete this Trailer">
+                                                    &times;
+                                                </button>
+                                            </div>
                                         ))}
                                     </div>
+                                    <Button type="button" variant="contained" onClick={handleAddTrailer}>Add New Trailer</Button>
                                 </AccordionDetails>
                             </Accordion>
 
@@ -310,7 +410,12 @@ export default function Editor() {
                                 <AccordionDetails className="flex flex-col gap-5">
                                     <div>
                                         <InputLabel htmlFor="header image">Header Image</InputLabel>
-                                        <img src={steamData.headerImage} alt=""/>
+                                        {
+                                            steamData.headerImage &&(
+                                                <img src={steamData.headerImage} alt=""/>
+                                            )
+                                        }
+
                                         <TextField
                                             required
                                             id="headerImage"
@@ -323,7 +428,9 @@ export default function Editor() {
                                     </div>
                                     <div>
                                         <InputLabel htmlFor="publishers">Capsule Image</InputLabel>
-                                        <img src={steamData.capsuleImage} alt=""/>
+                                        {steamData.capsuleImage &&(
+                                            <img src={steamData.capsuleImage} alt=""/>
+                                        )}
                                         <TextField
                                             required
                                             id="capsuleImage"
@@ -337,12 +444,16 @@ export default function Editor() {
 
                                 </AccordionDetails>
                             </Accordion>
-
-                            <Button variant="contained" color="success" type="submit" className="rounded-sm p-2 bg-green-500 w-1/2 cursor-pointer hover:opacity-90">Update the Game</Button>
+                            <div  className="flex flex-row gap-10">
+                                <ButtonGroup variant="contained" aria-label="Basic button group">
+                                <Button variant="contained" color="success" type="submit" className="rounded-sm p-2 bg-green-500 w-1/2 cursor-pointer hover:opacity-90">Update</Button>
+                                <Button onClick={handleDelete} variant="contained" color="error" type="delete" className="rounded-sm p-2 bg-red-500 w-1/2 cursor-pointer hover:opacity-90">Delete</Button>
+                                </ButtonGroup>
+                            </div>
                         </div>
-
                     </form>
                 )}
         </div>
+
     )
 }

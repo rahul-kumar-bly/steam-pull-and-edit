@@ -1,12 +1,11 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Homepage from "./Pages/Homepage.jsx";
 import Header from "./Pages/Components/Header.jsx";
-import Signup from "./Pages/Signup.jsx";
-import Signin from "./Pages/Signin.jsx";
 import SubmitGame from "./Pages/SubmitGame.jsx";
-import AllGames from "./Pages/AllGames.jsx";
 import Editor from "./Pages/Editor.jsx"
 import Footer from "./Pages/Components/Footer.jsx"
+import SubmitManualGame from "./Pages/SubmitManualGame.jsx";
+import SubmitMultipleGames from "./Pages/SubmitMultipleGames.jsx";
 
 export default function App() {
     return (
@@ -14,10 +13,9 @@ export default function App() {
             <Header />
             <Routes>
                 <Route path="/" element={<Homepage />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/signin" element={<Signin />} />
                 <Route path="/submit" element={<SubmitGame />} />
-                <Route path="/all" element={<AllGames />} />
+                <Route path="/manual" element={<SubmitManualGame />} />
+                <Route path="/batch" element={<SubmitMultipleGames />} />
                 <Route path="/edit/:id" element={<Editor />} />
             </Routes>
             <Footer/>

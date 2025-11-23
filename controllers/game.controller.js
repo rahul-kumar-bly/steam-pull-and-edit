@@ -82,3 +82,14 @@ export async function updateGame (req, res) {
         return res.send(err.message)
     }
 }
+
+export async function deleteGame (req, res) {
+    try {
+        const documentId = req.params.id;
+        const game = await Game.findByIdAndDelete(documentId)
+        res.status(200).send(game);
+    } catch (err){
+        res.status(404).send('Games not found');
+    }
+
+}

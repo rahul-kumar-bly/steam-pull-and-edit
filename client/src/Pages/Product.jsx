@@ -135,23 +135,15 @@ export default function Product(){
                                         </div>
                                     </div>
                                 </div>
-                                {/*<div className="cart-wishlist-container">*/}
-                                {/*    <div className="product-cart" id="addToCart">*/}
-                                {/*        <i className="bi bi-cart-fill"></i> <span id="addToCartText"*/}
-                                {/*                                                  className="add-to-cart-text">ADD TO CART</span>*/}
-                                {/*    </div>*/}
-                                {/*    <div className="product-wishlist" id="addToWishlist">*/}
-                                {/*        <i className="bi bi-heart"></i> <span className="add-to-wishlist-text"*/}
-                                {/*                                              id="addToWishlistText">ADD TO WISHLIST</span>*/}
-                                {/*    </div>*/}
-                                {/*</div>*/}
+
                             </div>
                             {/*// <!-- top-right-container closing tag -->*/}
 
                         </div>
                         {/*// <!-- top-container closing tag -->*/}
                     </div>
-                    {/*// <!-- topContainerBg closing tag -->*/}
+
+
                     <div className="middle-container" id="middleContainer">
                         <div className="description-container">
                             <h2>About the game</h2>
@@ -162,12 +154,6 @@ export default function Product(){
 
                         <div className="sidebar-container">
                             <img src={gameData.capsuleImage} alt=""/>
-                            <ul className="sidebar-categories">
-                                {/*{gameData[productId].data.categories.map((category) => (*/}
-                                {/*{gameData[productId].data.categories.map((category) => (*/}
-                                {/*    // <SidebarCategories category={category}/>*/}
-                                {/*))}*/}
-                            </ul>
                             <ul className="sidebar-genre">
                                 {gameData.genres.map(genre => (
                                     <li>{genre.description}</li>

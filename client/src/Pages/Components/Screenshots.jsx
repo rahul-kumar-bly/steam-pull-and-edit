@@ -50,12 +50,10 @@ export default function Screenshots({screenshots}) {
             onSlideChange={() => console.log('slide change')}
             onSwiper={(swiper) => console.log(swiper)}
         >
-            {/*{gameData[productId].data.movies && (*/}
-            {/*    <SwiperSlide> <video poster={gameData[productId].data.movies[0].thumbnail} width="auto" height="393" src={gameData[productId].data.movies[0].mp4[480]} controls/> </SwiperSlide>*/}
-            {/*)}*/}
-            {screenshots && screenshots.map(screenshot => (
-                <SwiperSlide> <img src={screenshot} onClick={handleImage} alt="" className="cursor-pointer"/> </SwiperSlide>
-            ))}
+                {screenshots && screenshots.map(screenshot => (
+                    <SwiperSlide> <img src={screenshot} onClick={handleImage} alt="" className="cursor-pointer"/> </SwiperSlide>
+                ))}
+
         </Swiper>
 
     <div id="imgOverlay" className="hidden fixed top-0 left-0 w-full h-full bg-black opacity-90 z-40" onClick={closeModal} >
@@ -87,9 +85,6 @@ export default function Screenshots({screenshots}) {
                 </a>
             </div>
         )}
-
-
-
     </div>
         </>
     )
