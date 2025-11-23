@@ -2,3 +2,4 @@ client/node_modules
 admin/node_modules
 node_modules
 .env
+*:Zone.Identifier
