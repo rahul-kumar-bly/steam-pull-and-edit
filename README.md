@@ -28,3 +28,7 @@ Add or Remove Screenshot:
 Frontend:
 <img width="1919" height="949" alt="image" src="https://github.com/user-attachments/assets/1c661626-b12f-49c7-a287-58b903c286c4" />
 
+Game Page:
+<img width="1770" height="3240" alt="image" src="https://github.com/user-attachments/assets/33d0ecd5-b5ca-4112-9bff-942b31fb3be9" />
+
+
