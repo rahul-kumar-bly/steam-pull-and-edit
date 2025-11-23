@@ -1,15 +1,30 @@
-Admin Page:
-<img width="1919" height="950" alt="image" src="https://github.com/user-attachments/assets/5c6d9ba2-9f4d-418c-8e9c-1a07ddf68267" />
+# About
+
+Steam Pull and Edit uses steam API to fetch video game data by given steam app ID. Steam doesn't provide sophisticated API to work upon, however, we can still fetch data by adding parameters to URL.
+This project utilizes following libraries and APIs:
+
+- React for frontend
+- Express for backend
+- Cloudinary to host images
+- Material UI for admin frotend
+- Chakra UI for client frontend
+- Swiper slider
+
+# Screenshots
+
+Admin Dashboard:
+<img width="1919" height="243" alt="image" src="https://github.com/user-attachments/assets/60eab2db-ea48-4691-8106-46cd0d798895" />
 
 Submit a new game using steam game/app ID:
 <img width="1919" height="785" alt="image" src="https://github.com/user-attachments/assets/816fdf4c-4a1c-431e-8142-8b67e7625de5" />
 
 Admin Editor:
-<img width="1919" height="949" alt="image" src="https://github.com/user-attachments/assets/e95dc0d8-14f0-4a18-9137-0504cc4806ec" />
+<img width="1770" height="3307" alt="image" src="https://github.com/user-attachments/assets/f74f566b-311d-412b-ba6e-89d5307b9d18" />
+
 
 Add or Remove Screenshot:
 <img width="1919" height="619" alt="image" src="https://github.com/user-attachments/assets/ba9579e8-e258-4242-86af-16e802335e74" />
 
-
+Frontend:
 <img width="1919" height="949" alt="image" src="https://github.com/user-attachments/assets/1c661626-b12f-49c7-a287-58b903c286c4" />
 
