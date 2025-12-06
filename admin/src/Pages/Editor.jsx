@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react";
 import {useParams} from "react-router-dom";
-import {Button, TextField, ButtonGroup} from "@mui/material";
+import {Button, TextField, ButtonGroup, IconButton} from "@mui/material";
 import Input from '@mui/material/Input';
 import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -11,8 +11,11 @@ import Alert from '@mui/material/Alert'
 import { FaCaretDown } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import UniversalDialog from './Components/UniversalDialog.jsx';
+import UniversalDialogForm from './Components/UniversalDialogForm.jsx';
 import {useSteamFormInput} from "../hooks/useSteamFormInput.js";
 import {useDeleteMedia} from "../hooks/useDeleteMedia.js";
+
+
 
 export default function Editor() {
     const [gameId, setGameId] = useState(null);
@@ -96,12 +99,16 @@ export default function Editor() {
     const handleChange = useSteamFormInput(steamData, setSteamData);
 
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogFormOpen, setDialogFormOpen] = useState(false);
     const [dialogTitle, setDialogTitle] = useState(null);
     const [dialogContent, setDialogContent] = useState(null);
+    const [dialogFormTitle, setDialogFormTitle] = useState(null);
+    const [dialogFormContent, setDialogFormContent] = useState(null);
     const [onAgreeHandler, setOnAgreeHandler] = useState(() => () => {});
-    const [mxWidth, setMxWidth] = useState("sm")
+    const [mxWidth, setMxWidth] = useState("sm");
+    const [dataLabel, setDataLabel] = useState('');
 
-
+    
     // Delete Entry
     const handleDelete = async (e) => {
         e.preventDefault();
@@ -156,6 +163,25 @@ export default function Editor() {
             })
         }
 
+    const addGenre = () => {
+        setDialogFormTitle('Add New Genre');
+        setDialogFormContent('Please provide the new genre to be added:');
+        setDataLabel('Genre Name');
+        setDialogFormOpen(true);
+    }
+
+const onAgreeFormHandler = (e) => {
+    e.preventDefault();  // stops page reload
+    const formData = new FormData(e.target);
+    const formJson = Object.fromEntries(formData.entries());
+    const newGenre = formJson.sentData;
+    if (!newGenre) return;
+    console.log("newGenre is", newGenre);
+    steamData.genres.push(newGenre);
+    setSteamData({ ...steamData });
+    setDialogFormOpen(false);
+};
+
 
     const handleAddScreenshot = (e) => {
         const screenshotUrl = prompt('Add a screenshot URL');
@@ -205,6 +231,16 @@ export default function Editor() {
                 onAgree={onAgreeHandler}
                 width = {mxWidth}
             />
+
+            <UniversalDialogForm
+                open={dialogFormOpen}
+                title={dialogFormTitle}
+                content={dialogFormContent}
+                onClose={() => setDialogFormOpen(false)}
+                onAgree={onAgreeFormHandler}
+                sentDataLabel={dataLabel}
+            />
+
             {loading ? "Loading...." : ""}
             <div className="my-4">
                 {error && (
@@ -296,10 +332,18 @@ export default function Editor() {
                                         type="text"
                                     />
                                     <div className="flex flex-col gap-1 flex-wrap">
+                                        <div className="flex flex-row gap-2 items-center">
                                         <InputLabel htmlFor="genres">Genres</InputLabel>
+                                                                                        <button
+                                                    className="bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 "
+                                                    type="button" onClick={addGenre}  title="Add new genre">
+                                                    +
+                                                </button>
+
+                                        </div>
                                         <div className="p-2 bg-slate-200 flex flex-col gap-2">
                                             {steamData.genres && steamData.genres.map((item, index) => (
-                                                <span key={index}>
+                                                <span key={index} className="flex flex-row items-center gap-10 justify-between">
                                                 <TextField
                                                     required
                                                     key={index}
@@ -309,9 +353,15 @@ export default function Editor() {
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
                                                 />
+                                                <button
+                                                    className="bg-red-700 text-white text-xs font-bold w-4 h-4 "
+                                                    type="button" onClick={() => handleDeleteMedia(index, "genres")}  title="Delete this genre">
+                                                    &times;
+                                                </button>
                                                 </span>
                                             ))}
                                         </div>
+                                        <div>Reload Genres</div>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-wrap">
                                         <InputLabel htmlFor="price">Price</InputLabel>
