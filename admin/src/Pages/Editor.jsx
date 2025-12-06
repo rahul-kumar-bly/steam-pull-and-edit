@@ -156,6 +156,28 @@ export default function Editor() {
             })
         }
 
+    const addGenre = () => {
+        const newGenre = prompt('Please provide a new genre');
+        if(!newGenre){
+            return 0;
+        }
+        steamData.genres.push(newGenre);
+        setSteamData({...steamData});
+    }
+
+    const removeGenre = (e, index) => {
+        e.preventDefault();
+        if (index < 0 || index >= steamData.genres.length){
+            alert('Invalid genre index');
+            return 0;
+        }
+        if (index === 0){
+            alert('Atleast one genre is required');
+            return 0;
+        }
+        steamData.genres.splice(index, 1);
+        setSteamData({...steamData});
+    }
 
     const handleAddScreenshot = (e) => {
         const screenshotUrl = prompt('Add a screenshot URL');
@@ -296,7 +318,9 @@ export default function Editor() {
                                         type="text"
                                     />
                                     <div className="flex flex-col gap-1 flex-wrap">
-                                        <InputLabel htmlFor="genres">Genres</InputLabel>
+                                        <div className="flex flex-row gap-2">
+                                        <InputLabel htmlFor="genres">Genres</InputLabel><span onClick={addGenre} className="bg-red-500 text-amber-50 text-xs p-1">Add genre</span>
+                                        </div>
                                         <div className="p-2 bg-slate-200 flex flex-col gap-2">
                                             {steamData.genres && steamData.genres.map((item, index) => (
                                                 <span key={index}>
@@ -308,10 +332,11 @@ export default function Editor() {
                                                     variant="standard"
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
-                                                />
+                                                /> <span onClick={(e) => removeGenre(e, index)}>Remove genre</span>
                                                 </span>
                                             ))}
                                         </div>
+                                        <div>Reload Genres</div>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-wrap">
                                         <InputLabel htmlFor="price">Price</InputLabel>
