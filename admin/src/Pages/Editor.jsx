@@ -332,7 +332,7 @@ const onAgreeFormHandler = (e) => {
                                         type="text"
                                     />
                                     <div className="flex flex-col gap-1 flex-wrap">
-                                        <div className="flex flex-row gap-2">
+                                        <div className="flex flex-row gap-2 items-center">
                                         <InputLabel htmlFor="genres">Genres</InputLabel>
                                                                                         <button
                                                     className="bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 "
@@ -343,7 +343,7 @@ const onAgreeFormHandler = (e) => {
                                         </div>
                                         <div className="p-2 bg-slate-200 flex flex-col gap-2">
                                             {steamData.genres && steamData.genres.map((item, index) => (
-                                                <span key={index}>
+                                                <span key={index} className="flex flex-row items-center gap-10 justify-between">
                                                 <TextField
                                                     required
                                                     key={index}
