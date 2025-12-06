@@ -102,7 +102,7 @@ export default function SubmitGame() {
                     capsuleImage: fetchData.capsule_image || "",
                     screenshots: fetchData.screenshots?.map(s => s.path_thumbnail) || [],
                     genres: fetchData.genres?.map(g => g.description) || [],
-                    trailer: fetchData.movies?.map(m => ({ thumbnail: m.thumbnail, trailer: m.webm["480"], name: m.name })) || [],
+                    trailer: fetchData.movies?.map(m => ({ thumbnail: m.thumbnail, trailer: m.dash_h264, name: m.name })) || [],
                     steamUrl: `https://store.steampowered.com/app/${gameId}`
                 });
             } catch (error) {
