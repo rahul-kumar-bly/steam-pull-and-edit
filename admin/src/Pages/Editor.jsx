@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import {useState, useEffect, use} from "react";
 import {useParams} from "react-router-dom";
 import {Button, TextField, ButtonGroup, IconButton} from "@mui/material";
 import Input from '@mui/material/Input';
@@ -8,13 +8,16 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Alert from '@mui/material/Alert'
+import Divider from '@mui/material/Divider';
 import { FaCaretDown } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import UniversalDialog from './Components/UniversalDialog.jsx';
 import UniversalDialogForm from './Components/UniversalDialogForm.jsx';
 import {useSteamFormInput} from "../hooks/useSteamFormInput.js";
 import {useDeleteMedia} from "../hooks/useDeleteMedia.js";
+import { usePushMedia } from "../hooks/usePushMedia.js";
 import { SmallBlueButton, SmallRedButton } from "./Components/SmallButtons.jsx";
+
 
 
 export default function Editor() {
@@ -163,41 +166,31 @@ export default function Editor() {
             })
         }
 
-    const addGenre = () => {
-        setDialogFormTitle('Add New Genre');
-        setDialogFormContent('Please provide the new genre to be added:');
-        setDataLabel('Genre Name');
+    // Produce dialog to add new genre or screenshot
+    const handlePushHook = usePushMedia(steamData, setError, setSteamData);
+    const handlePushMedia = (mediaType) => {
         setDialogFormOpen(true);
+        setOnAgreeHandler(()=>(e)=>{
+            handlePushHook(e, mediaType);
+            setDialogFormOpen(false);
+        })
+    }     
+        
+    const handleAddGenre = () => {
+        setDialogFormTitle(`Add New Genre`);
+        setDialogFormContent(`Please provide the new genre:`);
+        setDataLabel('URL....');
+        handlePushMedia("genres");
     }
 
-const onAgreeFormHandler = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const formJson = Object.fromEntries(formData.entries());
-    const newGenre = formJson.sentData;
-    if (!newGenre) return;
-    console.log("newGenre is", newGenre);
-    steamData.genres.push(newGenre);
-    setSteamData({ ...steamData });
-    setDialogFormOpen(false);
-};
-
-
-    const handleAddScreenshot = (e) => {
-        const screenshotUrl = prompt('Add a screenshot URL');
-        if (!screenshotUrl) {
-            return 0;
-        }
-        try{
-            setSteamData(prev =>({
-                ...prev,
-                screenshots:[...(prev.screenshots || []), screenshotUrl]
-            }))
-        } catch (e){
-            console.log('something happened', e.message);
-        }
+    const handleAddScreenshot = () => {
+        setDialogFormTitle(`Add New Screenshot`);
+        setDialogFormContent(`Please provide the image url to be added:`);
+        setDataLabel('URL....');
+        handlePushMedia("screenshots");
     }
 
+    // TODO: Implement Universal Dialog Form for adding new trailer
     const handleAddTrailer = (e) => {
         e.preventDefault();
         const trailerVidId = prompt('Please provide youtube video ID');
@@ -237,7 +230,7 @@ const onAgreeFormHandler = (e) => {
                 title={dialogFormTitle}
                 content={dialogFormContent}
                 onClose={() => setDialogFormOpen(false)}
-                onAgree={onAgreeFormHandler}
+                onAgree={(e)=>onAgreeHandler(e)}
                 sentDataLabel={dataLabel}
             />
 
@@ -334,13 +327,7 @@ const onAgreeFormHandler = (e) => {
                                     <div className="flex flex-col gap-1 flex-wrap">
                                         <div className="flex flex-row gap-2 items-center">
                                         <InputLabel htmlFor="genres">Genres</InputLabel>
-                                                                                        {/* <button
-                                                    className="bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 "
-                                                    type="button" onClick={addGenre}  title="Add new genre">
-                                                    +
-                                                </button> */}
-                                                <SmallBlueButton text="+" tooltip="Add new genre" onClickHandle={addGenre} />
-
+                                                <SmallBlueButton text="+" tooltip="Add new genre" onClickHandle={handleAddGenre} />
                                         </div>
                                         <div className="p-2 bg-slate-200 flex flex-col gap-2">
                                             {steamData.genres && steamData.genres.map((item, index) => (
@@ -354,11 +341,6 @@ const onAgreeFormHandler = (e) => {
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
                                                 />
-                                                {/* <button
-                                                    className="bg-red-700 text-white text-xs font-bold w-4 h-4 "
-                                                    type="button" onClick={() => handleDeleteMedia(index, "genres")}  title="Delete this genre">
-                                                    &times;
-                                                </button> */}
                                                 <SmallRedButton text="&times;" tooltip="Delete this genre" onClickHandle={() => handleDeleteMedia(index, "genres")} />
                                                 </span>
                                             ))}
@@ -419,7 +401,11 @@ const onAgreeFormHandler = (e) => {
                                     Media (Screenshots & Trailers)
                                 </AccordionSummary>
                                 <AccordionDetails className="flex flex-col gap-5">
-                                    <InputLabel htmlFor="screenshots">Screenshots</InputLabel>
+                                    <div className="flex flex-row gap-2 items-center">
+                                        <InputLabel htmlFor="screenshots">Screenshots</InputLabel>
+                                        <SmallBlueButton text="+" tooltip="Add new screenshot" onClickHandle={handleAddScreenshot} />
+                                    </div>
+
                                     <div className="flex flex-row gap-3 flex-wrap">
                                         {steamData.screenshots.length === 0 &&(
                                             <p>No screenshots are available.</p>
@@ -433,15 +419,10 @@ const onAgreeFormHandler = (e) => {
                                                     tooltip="Delete this screenshot" 
                                                     onClickHandle={() => handleDeleteMedia(index, "screenshots")} 
                                                 />
-                                                {/* <button
-                                                    className="absolute top-1 right-1 bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 flex items-center justify-center cursor-pointer"
-                                                    type="button" onClick={() => handleDeleteMedia(index, "screenshots")}  title="Delete this screenshot">
-                                                    &times;
-                                                </button> */}
                                             </div>
                                         ))}
                                     </div>
-                                    <Button onClick={handleAddScreenshot} type="button" variant="contained">Add New Screenshot</Button>
+                                    <Divider />
                                     <InputLabel htmlFor="trailers">Trailers</InputLabel>
                                     <div className="flex flex-col flex-wrap gap-2 max-w-full">
                                         {steamData.trailer && steamData.trailer.map((item,index) => (
@@ -453,11 +434,6 @@ const onAgreeFormHandler = (e) => {
                                                     tooltip="Delete this Trailer" 
                                                     onClickHandle={() => handleDeleteMedia(index, "trailer")} 
                                                 />
-                                                {/* <button
-                                                    className="absolute top-1 right-1 bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 flex items-center justify-center cursor-pointer"
-                                                    type="button" onClick={() => handleDeleteMedia(index, "trailer")}  title="Delete this Trailer">
-                                                    &times;
-                                                </button> */}
                                             </div>
                                         ))}
                                     </div>
