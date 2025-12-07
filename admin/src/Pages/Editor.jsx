@@ -14,7 +14,7 @@ import UniversalDialog from './Components/UniversalDialog.jsx';
 import UniversalDialogForm from './Components/UniversalDialogForm.jsx';
 import {useSteamFormInput} from "../hooks/useSteamFormInput.js";
 import {useDeleteMedia} from "../hooks/useDeleteMedia.js";
-
+import { SmallBlueButton, SmallRedButton } from "./Components/SmallButtons.jsx";
 
 
 export default function Editor() {
@@ -110,7 +110,7 @@ export default function Editor() {
 
     
     // Delete Entry
-    const handleDelete = async (e) => {
+    const handleDeleteEntry = async (e) => {
         e.preventDefault();
         console.log('open the dialog for confirm delete the entry')
         setDialogTitle('Confirm Delete?');
@@ -171,7 +171,7 @@ export default function Editor() {
     }
 
 const onAgreeFormHandler = (e) => {
-    e.preventDefault();  // stops page reload
+    e.preventDefault();
     const formData = new FormData(e.target);
     const formJson = Object.fromEntries(formData.entries());
     const newGenre = formJson.sentData;
@@ -334,11 +334,12 @@ const onAgreeFormHandler = (e) => {
                                     <div className="flex flex-col gap-1 flex-wrap">
                                         <div className="flex flex-row gap-2 items-center">
                                         <InputLabel htmlFor="genres">Genres</InputLabel>
-                                                                                        <button
+                                                                                        {/* <button
                                                     className="bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 "
                                                     type="button" onClick={addGenre}  title="Add new genre">
                                                     +
-                                                </button>
+                                                </button> */}
+                                                <SmallBlueButton text="+" tooltip="Add new genre" onClickHandle={addGenre} />
 
                                         </div>
                                         <div className="p-2 bg-slate-200 flex flex-col gap-2">
@@ -353,11 +354,12 @@ const onAgreeFormHandler = (e) => {
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
                                                 />
-                                                <button
+                                                {/* <button
                                                     className="bg-red-700 text-white text-xs font-bold w-4 h-4 "
                                                     type="button" onClick={() => handleDeleteMedia(index, "genres")}  title="Delete this genre">
                                                     &times;
-                                                </button>
+                                                </button> */}
+                                                <SmallRedButton text="&times;" tooltip="Delete this genre" onClickHandle={() => handleDeleteMedia(index, "genres")} />
                                                 </span>
                                             ))}
                                         </div>
@@ -425,11 +427,17 @@ const onAgreeFormHandler = (e) => {
                                         {steamData.screenshots && steamData.screenshots.map((screenshot, index) => (
                                             <div key={index}  className="w-1/4 h-auto cursor-pointer transition-transform hover:scale-105 relative">
                                                 <img src={screenshot} alt=""/>
-                                                <button
+                                                <SmallRedButton 
+                                                    classProps="absolute top-1 right-1 flex items-center justify-center " 
+                                                    text="&times;" 
+                                                    tooltip="Delete this screenshot" 
+                                                    onClickHandle={() => handleDeleteMedia(index, "screenshots")} 
+                                                />
+                                                {/* <button
                                                     className="absolute top-1 right-1 bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 flex items-center justify-center cursor-pointer"
                                                     type="button" onClick={() => handleDeleteMedia(index, "screenshots")}  title="Delete this screenshot">
                                                     &times;
-                                                </button>
+                                                </button> */}
                                             </div>
                                         ))}
                                     </div>
@@ -439,11 +447,17 @@ const onAgreeFormHandler = (e) => {
                                         {steamData.trailer && steamData.trailer.map((item,index) => (
                                             <div className="w-1/3 h-auto relative" key={index}>
                                                 <video poster={item.thumbnail}  src={item.trailer} controls title={item.name}/>
-                                                <button
+                                                <SmallRedButton 
+                                                    classProps="absolute top-1 right-1 flex items-center justify-center cursor-pointer" 
+                                                    text="&times;" 
+                                                    tooltip="Delete this Trailer" 
+                                                    onClickHandle={() => handleDeleteMedia(index, "trailer")} 
+                                                />
+                                                {/* <button
                                                     className="absolute top-1 right-1 bg-[rgb(90,136,175)] text-white text-xs font-bold w-4 h-4 flex items-center justify-center cursor-pointer"
                                                     type="button" onClick={() => handleDeleteMedia(index, "trailer")}  title="Delete this Trailer">
                                                     &times;
-                                                </button>
+                                                </button> */}
                                             </div>
                                         ))}
                                     </div>
@@ -497,7 +511,7 @@ const onAgreeFormHandler = (e) => {
                             <div  className="flex flex-row gap-10">
                                 <ButtonGroup variant="contained" aria-label="Basic button group">
                                 <Button variant="contained" color="success" type="submit" className="rounded-sm p-2 bg-green-500 w-1/2 cursor-pointer hover:opacity-90">Update</Button>
-                                <Button onClick={handleDelete} variant="contained" color="error" type="delete" className="rounded-sm p-2 bg-red-500 w-1/2 cursor-pointer hover:opacity-90">Delete</Button>
+                                <Button onClick={handleDeleteEntry} variant="contained" color="error" type="delete" className="rounded-sm p-2 bg-red-500 w-1/2 cursor-pointer hover:opacity-90">Delete</Button>
                                 </ButtonGroup>
                             </div>
                         </div>
