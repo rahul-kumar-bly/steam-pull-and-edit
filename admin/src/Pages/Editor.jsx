@@ -84,7 +84,8 @@ export default function Editor() {
             const data = await res.json();
             if (data) {
                 console.log(steamData);
-                alert('Game Updated Successfully!');
+                handleGameUpdated()
+                // alert('Game Updated Successfully!');
             } else {
                 console.log('Error in updating data', data.message);
                 setError(`Error in updating data: ${data.message}`);
@@ -111,6 +112,10 @@ export default function Editor() {
     const [mxWidth, setMxWidth] = useState("sm");
     const [dataLabel, setDataLabel] = useState('');
 
+
+    function handlePreview(){
+        navigate(`/preview/${params.id}`);
+    }
     
     // Delete Entry
     const handleDeleteEntry = async (e) => {
@@ -148,6 +153,18 @@ export default function Editor() {
         })
 
     };
+
+    // Game updated dialog
+    const handleGameUpdated = () => {
+        setDialogTitle('Game Updated');
+        setDialogContent('Game details have been updated successfully.');
+        setDialogOpen(true);
+        setMxWidth("xs");
+        setOnAgreeHandler(() => () => {
+            setDialogOpen(false);
+            navigate(`/`);
+        });
+    }
 
     // Produce dialog to confirm deletion of individual screenshot or trailer
     const handleDeleteHook = useDeleteMedia(steamData, setError, setSteamData)
@@ -488,6 +505,7 @@ export default function Editor() {
                                 <ButtonGroup variant="contained" aria-label="Basic button group">
                                 <Button variant="contained" color="success" type="submit" className="rounded-sm p-2 bg-green-500 w-1/2 cursor-pointer hover:opacity-90">Update</Button>
                                 <Button onClick={handleDeleteEntry} variant="contained" color="error" type="delete" className="rounded-sm p-2 bg-red-500 w-1/2 cursor-pointer hover:opacity-90">Delete</Button>
+                                <Button onClick={handlePreview} variant="contained" color="info" type="button" className="rounded-sm p-2 bg-blue-500 w-1/2 cursor-pointer hover:opacity-90">Preview</Button>
                                 </ButtonGroup>
                             </div>
                         </div>

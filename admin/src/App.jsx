@@ -4,6 +4,7 @@ import Header from "./Pages/Components/Header.jsx";
 import SubmitGame from "./Pages/SubmitGame.jsx";
 import Editor from "./Pages/Editor.jsx"
 import Footer from "./Pages/Components/Footer.jsx"
+import Preview from "./Pages/Preview.jsx";
 import SubmitManualGame from "./Pages/SubmitManualGame.jsx";
 import SubmitMultipleGames from "./Pages/SubmitMultipleGames.jsx";
 
@@ -17,6 +18,7 @@ export default function App() {
                 <Route path="/manual" element={<SubmitManualGame />} />
                 <Route path="/batch" element={<SubmitMultipleGames />} />
                 <Route path="/edit/:id" element={<Editor />} />
+                <Route path="/preview/:id" element={<Preview />} />
             </Routes>
             <Footer/>
         </BrowserRouter>
