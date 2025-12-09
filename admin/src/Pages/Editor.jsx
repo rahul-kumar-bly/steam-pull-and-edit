@@ -84,7 +84,7 @@ export default function Editor() {
             const data = await res.json();
             if (data) {
                 console.log(steamData);
-                handleGameUpdated()
+                handleGameUpdated();
                 // alert('Game Updated Successfully!');
             } else {
                 console.log('Error in updating data', data.message);
@@ -162,7 +162,6 @@ export default function Editor() {
         setMxWidth("xs");
         setOnAgreeHandler(() => () => {
             setDialogOpen(false);
-            navigate(`/`);
         });
     }
 
@@ -196,7 +195,7 @@ export default function Editor() {
     const handleAddGenre = () => {
         setDialogFormTitle(`Add New Genre`);
         setDialogFormContent(`Please provide the new genre:`);
-        setDataLabel('URL....');
+        setDataLabel('Genre....');
         handlePushMedia("genres");
     }
 
