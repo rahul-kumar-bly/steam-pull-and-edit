@@ -25,8 +25,8 @@ Admin Editor:
 Add or Remove Screenshot:
 <img width="1919" height="619" alt="image" src="https://github.com/user-attachments/assets/ba9579e8-e258-4242-86af-16e802335e74" />
 
-Frontend:
-<img width="1919" height="949" alt="image" src="https://github.com/user-attachments/assets/1c661626-b12f-49c7-a287-58b903c286c4" />
+Preview Screen:
+<img width="1788" height="2659" alt="image" src="https://github.com/user-attachments/assets/003e69be-8899-4f45-8eaa-e0f49b11bbd1" />
 
 Game Page:
 <img width="1770" height="3240" alt="image" src="https://github.com/user-attachments/assets/33d0ecd5-b5ca-4112-9bff-942b31fb3be9" />
