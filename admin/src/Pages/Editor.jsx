@@ -110,7 +110,7 @@ export default function Editor() {
     const [dialogFormContent, setDialogFormContent] = useState(null);
     const [onAgreeHandler, setOnAgreeHandler] = useState(() => () => {});
     const [mxWidth, setMxWidth] = useState("sm");
-    const [dataLabel, setDataLabel] = useState('');
+    const [dataLabel, setDataLabel] = useState('Value....');
 
 
     function handlePreview(){
@@ -169,11 +169,13 @@ export default function Editor() {
     const handleDeleteHook = useDeleteMedia(steamData, setError, setSteamData)
     const handleDeleteMedia = (index, mediaType) => {
             setDialogTitle('Confirm Delete?');
-            setDialogContent(`Are you sure you want to delete this ${mediaType}? This can't be undo.`);
+            setDialogContent(`Are you sure you want to delete ${steamData[mediaType][index]}? This can't be undo.`);
             setDialogOpen(true);
             setMxWidth("xs")
             if (steamData[mediaType].length === 1) {
-                setError(`Can not proceed with removing ${mediaType}, this is the last one!`);
+                setError(`Can not proceed with removing ${steamData[mediaType][index]}, this is the last one!`);
+                setDialogTitle('Caution!');
+                setDialogContent(`Can not proceed with removing ${steamData[mediaType][index]}, this is the last one!`)
                 return 0
             }
             setOnAgreeHandler(() => ()  => {
@@ -195,8 +197,19 @@ export default function Editor() {
     const handleAddGenre = () => {
         setDialogFormTitle(`Add New Genre`);
         setDialogFormContent(`Please provide the new genre:`);
-        setDataLabel('Genre....');
         handlePushMedia("genres");
+    }
+
+    const handleAddDevs = () => {
+        setDialogFormTitle(`Add New Developers`);
+        setDialogFormContent(`Please provide the new developer name:`);
+        handlePushMedia("devs");
+    }
+
+        const handleAddPubs = () => {
+        setDialogFormTitle(`Add New Genre`);
+        setDialogFormContent(`Please provide the new publisher name:`);
+        handlePushMedia("pubs");
     }
 
     const handleAddScreenshot = () => {
@@ -255,7 +268,6 @@ export default function Editor() {
                 {error && (
                     <Alert severity="error">{error}</Alert>
                 )}
-
             </div>
                 { steamData && (
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-wrap">
@@ -375,10 +387,15 @@ export default function Editor() {
                                     </div>
 
                                     <div  className="flex flex-col gap-1 flex-wrap">
+                                        <div className="flex flex-row gap-2 items-center">
                                         <InputLabel htmlFor="developers">Developers</InputLabel>
+                                                <SmallBlueButton text="+" tooltip="Add new developer" onClickHandle={handleAddDevs} />
+                                        </div>
+
 
                                         <div className="p-2 bg-slate-200 flex flex-col gap-2">
                                             {steamData.devs && steamData.devs.map((item, index) => (
+                                            <span key={index} className="flex flex-row items-center gap-10 justify-between">
                                                 <TextField
                                                     required
                                                     key={index}
@@ -388,23 +405,35 @@ export default function Editor() {
                                                     value={item}
                                                     onChange={(e)=> handleChange(e,index)}
                                                 />
+                                                <SmallRedButton text="&times;" tooltip="Delete this developer entry" onClickHandle={() => handleDeleteMedia(index, "devs")} />
+                                            </span>
                                             ))}
                                         </div>
                                     </div>
                                     <div  className="flex flex-col gap-1 flex-wrap">
-                                        <InputLabel htmlFor="publishers">Publishers</InputLabel>
+
+
+                                        <div className="flex flex-row gap-2 items-center">
+                                                <InputLabel htmlFor="publishers">Publishers</InputLabel>
+                                                <SmallBlueButton text="+" tooltip="Add new publisher" onClickHandle={handleAddPubs} />
+                                        </div>
+
+
                                         <div className="p-2 flex flex-col bg-slate-200 gap-2">
                                             {steamData.pubs && steamData.pubs.map((item, index) => (
-                                                <TextField
-                                                    required
-                                                    fullWidth
-                                                    key={index}
-                                                    id={`pub-${index}`}
-                                                    // defaultValue="dev"
-                                                    variant="standard"
-                                                    value={item}
-                                                    onChange={(e)=> handleChange(e,index)}
-                                                />
+                                                <span key={index} className="flex flex-row items-center gap-10 justify-between">
+                                                    <TextField
+                                                        required
+                                                        fullWidth
+                                                        key={index}
+                                                        id={`pub-${index}`}
+                                                        // defaultValue="dev"
+                                                        variant="standard"
+                                                        value={item}
+                                                        onChange={(e)=> handleChange(e,index)}
+                                                    />
+                                                    <SmallRedButton text="&times;" tooltip="Delete this publisher entry" onClickHandle={() => handleDeleteMedia(index, "pubs")} />
+                                                </span>
                                             ))}
                                         </div>
                                     </div>
