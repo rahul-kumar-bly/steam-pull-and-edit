@@ -472,7 +472,12 @@ export default function Editor() {
                                     <div className="flex flex-col flex-wrap gap-2 max-w-full">
                                         {steamData.trailer && steamData.trailer.map((item,index) => (
                                             <div className="w-1/3 h-auto relative" key={index}>
+                                                {(item.trailer.includes('youtube.com')) &&(
+                                                    <iframe className="w-full" src={`${item.trailer.replace('watch?v=', 'embed/')}`} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                                                )}
+                                                {(!item.trailer.includes('youtube.com'))&&(
                                                 <video poster={item.thumbnail}  src={item.trailer} controls title={item.name}/>
+                                                )}
                                                 <SmallRedButton 
                                                     classProps="absolute top-1 right-1 flex items-center justify-center cursor-pointer" 
                                                     text="&times;" 

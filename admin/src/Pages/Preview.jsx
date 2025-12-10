@@ -167,7 +167,16 @@ export default function Preview() {
                         <div className="my-4 max-w-6xl">
                             <div className="flex flex-row gap-3 overflow-x-auto my-2">
                                 {steamData.trailer.map((item, index) => (
-                                        <video poster={item.thumbnail}  src={item.trailer} controls title={item.name} className="w-[300px]"/>
+                                    <>
+                                    {(item.trailer.includes('youtube.com')) &&(
+                                        <iframe className="w-full" src={`${item.trailer.replace('watch?v=', 'embed/')}`} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                                    )}
+                                    {(!item.trailer.includes('youtube.com'))&&(
+                                    <video poster={item.thumbnail}  src={item.trailer} controls title={item.name}/>
+                                    )}
+
+                                    </>
+
                                 ))}
                                 </div>
                         </div>
