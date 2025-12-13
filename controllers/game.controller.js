@@ -1,13 +1,13 @@
+import { parse } from 'dotenv';
 import Game from '../models/game.model.js'
 
 export async function addGame (req, res) {
-    console.log('ehhdskjhdkjshfdjkshdkjh')
     try {
         const {
             appId, name, description, shortDescription,
             genres, price, devs,
             pubs, screenshots, trailer, website, headerImage,
-            capsuleImage, steamUrl
+            capsuleImage, steamUrl, releaseDate
         } = req.body;
 
     const newGame = await Game.create({
@@ -24,6 +24,7 @@ export async function addGame (req, res) {
         website:website,
         headerImage:headerImage,
         capsuleImage:capsuleImage,
+        releaseDate: releaseDate,
         steamUrl:steamUrl
     })
     res.status(200).send(newGame)

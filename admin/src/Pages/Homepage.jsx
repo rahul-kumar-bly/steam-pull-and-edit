@@ -26,13 +26,15 @@ export default function AllGames() {
         fetchAllGames();
     }, [])
 
-    if (games.length === 0) {
-        return (
-            <p>No Data found, add something.</p>
-        )
-    }
+
     return (
         <div className="flex flex-row gap-3 flex-wrap p-5">
+            {loading && (
+                <p>Loading.....</p>
+            )}
+        {!games && (
+            <p>No games found, add new!</p>
+        )}
             {games && games.map((item,index) => (
                 <div className="" key={index}>
                     <Link to={`/edit/${item._id}`}>

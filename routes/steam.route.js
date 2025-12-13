@@ -1,5 +1,5 @@
 import express from "express";
-import getSteamApi from "../controllers/steam.controller.js";
+import {getSteamBatchJsonData, getSteamJsonData} from "../controllers/steam.controller.js";
 const route = express.Router();
 
 route.get("/test", (req, res) => {
@@ -7,6 +7,7 @@ route.get("/test", (req, res) => {
     res.send("Welcome to the test")
 })
 
-route.get("/get/:id", getSteamApi);
+route.get("/get/:id", getSteamJsonData);
+route.get("/getbatch/:id", getSteamBatchJsonData);
 
 export default route;

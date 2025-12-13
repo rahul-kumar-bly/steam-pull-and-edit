@@ -12,6 +12,7 @@ import {FaCaretDown} from "react-icons/fa";
 import { FaSteamSymbol } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import {useSteamFormInput} from "../hooks/useSteamFormInput.js";
+import dayjs from "dayjs";
 
 export default function SubmitGame() {
 
@@ -33,6 +34,7 @@ export default function SubmitGame() {
         screenshots:[],
         genres: [],
         trailer:[],
+        releaseDate:[],
         steamUrl: ""
     });
 
@@ -103,6 +105,7 @@ export default function SubmitGame() {
                     screenshots: fetchData.screenshots?.map(s => s.path_thumbnail) || [],
                     genres: fetchData.genres?.map(g => g.description) || [],
                     trailer: fetchData.movies?.map(m => ({ thumbnail: m.thumbnail, trailer: m.dash_h264, name: m.name })) || [],
+                    releaseDate: fetchData.release_date || [],
                     steamUrl: `https://store.steampowered.com/app/${gameId}`
                 });
             } catch (error) {
@@ -115,6 +118,7 @@ export default function SubmitGame() {
             setError(`Enter an ID to begin fetching data`);
             setLoading(false);
         }
+            console.log(steamData)
     }
 
     return (
@@ -209,6 +213,8 @@ export default function SubmitGame() {
                                         fullWidth
                                         type="text"
                                     />
+                                    
+                                    
 
                                 </AccordionDetails>
                             </Accordion>
@@ -256,6 +262,27 @@ export default function SubmitGame() {
                                             onChange={handleChange}
                                             startAdornment={<InputAdornment position="start">₹</InputAdornment>}/>
                                     </div>
+
+                                    <div className="flex flex-col gap-1 flex-wrap">
+                                        <InputLabel htmlFor="Release Date">Release Date</InputLabel>
+
+                                        {steamData.releaseDate?.date && (
+                                        <>
+                                        {
+                                            steamData.releaseDate.coming_soon ? <p> Coming Soon </p> :
+                                            <Input
+                                                id="date"
+                                                type="date"
+                                                label="date"
+                                                value={dayjs(steamData.releaseDate?.date).format("YYYY-MM-DD")}
+                                                onChange={handleChange}
+                                                />
+
+                                        }
+                                        </>
+                                        )}
+                                        {/* 1920290 - barkour not released yet */}
+                                    </div> 
 
                                     <div  className="flex flex-col gap-1 flex-wrap">
                                         <InputLabel htmlFor="developers">Developers</InputLabel>
