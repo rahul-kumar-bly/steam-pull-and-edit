@@ -553,7 +553,8 @@ export default function Editor() {
 
                                 </AccordionDetails>
                             </Accordion>
-                            <div  className="flex flex-row gap-10">
+                            <div className="flex flex-row p-2 fixed right-0 bottom-0 mx-5 border-1 border-b-0 bg-white">
+                            {/* <div  className="flex flex-row gap-10"> */}
                                 <ButtonGroup variant="contained" aria-label="Basic button group">
                                 <Button variant="contained" color="success" type="submit" className="rounded-sm p-2 bg-green-500 w-1/2 cursor-pointer hover:opacity-90">Update</Button>
                                 <Button onClick={handleDeleteEntry} variant="contained" color="error" type="delete" className="rounded-sm p-2 bg-red-500 w-1/2 cursor-pointer hover:opacity-90">Delete</Button>
