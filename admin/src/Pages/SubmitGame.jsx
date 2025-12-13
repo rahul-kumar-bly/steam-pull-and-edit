@@ -13,12 +13,24 @@ import { FaSteamSymbol } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import {useSteamFormInput} from "../hooks/useSteamFormInput.js";
 import dayjs from "dayjs";
+import NameInfo from "./Components/Editor UI/NameInfo.jsx";
+import GameDesc from "./Components/Editor UI/GameDesc.jsx";
+import AdditionalMedia from "./Components/Editor UI/AdditionalMedia.jsx";
+import UniversalDialog from "./Components/UniversalDialog.jsx";
 
 export default function SubmitGame() {
 
     const [gameId, setGameId] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+
+
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogTitle, setDialogTitle] = useState(null);
+    const [dialogContent, setDialogContent] = useState(null);
+    const [onAgreeHandler, setOnAgreeHandler] = useState(() => () => {});
+    const [dialogWidth, setDialogWidth] = useState("sm");
+
 
     const [steamData, setSteamData] = useState({
         appId: "",
@@ -41,6 +53,28 @@ export default function SubmitGame() {
     const navigate = useNavigate();
     const handleChange = useSteamFormInput(steamData, setSteamData);
 
+    const handleGamePushed = () => {
+        setDialogTitle('Game Added');
+        setDialogContent('New game has been pushed successfully.');
+        setDialogOpen(true);
+        setDialogWidth("xs");
+        setOnAgreeHandler(() => () => {
+            setDialogOpen(false);
+            navigate('/');
+        });
+    }
+
+    const handleGamePushedError = (message) =>{
+        setDialogTitle('Error'); 
+        setDialogContent(message);
+        setDialogOpen(true);
+        setDialogWidth("xs");
+        setOnAgreeHandler(() => () => {
+            setDialogOpen(false);
+            navigate('/');
+        });
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -51,20 +85,19 @@ export default function SubmitGame() {
                 body: JSON.stringify(steamData),
             });
             const data = await res.json();
-            if (data) {
+            if (res.status === 200) {
                 console.log(data);
-                alert('Game Added Successfully!');
+                handleGamePushed();
             } else {
+                handleGamePushedError(data.message + ". Click Agree to go back to Homepage.");
                 console.log('Error in fetching data', data.message);
                 setError(`Error in fetching data: ${data.message}`);
             }
-
         } catch (error) {
             console.log('Error encountered while creating game', error);
             setError(`Error encountered while creating game: ${error}`);
         } finally {
             setLoading(false);
-            navigate('/');
         }
 
     };
@@ -123,6 +156,15 @@ export default function SubmitGame() {
 
     return (
             <div className="max-w-lg mx-auto my-5">
+                <UniversalDialog 
+                    title={dialogTitle}
+                    open={dialogOpen}
+                    onAgree={onAgreeHandler}
+                    onClose={() => setDialogOpen(false)}
+                    content={dialogContent}
+                    width={dialogWidth}
+                />
+
                 {error && (
                     <Alert severity="error" className="text-red-700 font-semibold my-2">{error}</Alert>
                 )}
@@ -153,72 +195,17 @@ export default function SubmitGame() {
                 { steamData.name !== "" && (
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-wrap my-3">
                         <div  className="flex flex-col gap-4 w-2xl">
-                            <div className="flex flex-col gap-4 w-2xl p-2" style={{backgroundImage: `linear-gradient(rgba(245, 245, 250, 0.85), rgba(235, 235, 240, 0.85))
-                                    , url(${steamData.headerImage})`, backgroundSize: "cover", backgroundPosition: "center"}}>
-                                <TextField
-                                    required
-                                    id="name"
-                                    label="Name"
-                                    // defaultValue="name"
-                                    variant="standard"
-                                    value={steamData.name}
-                                    onChange={handleChange}
-                                    fullWidth
-                                    type="text"
-                                />
-                                <TextField
-                                    required
-                                    id="steamUrl"
-                                    label="Steam Url"
-                                    // defaultValue="https://store.steam.com"
-                                    variant="standard"
-                                    value={steamData.steamUrl}
-                                    onChange={handleChange}
-                                    fullWidth
-                                    type="text"
-                                />
+                        <NameInfo gameDb={steamData} handleChange={handleChange} />
 
-                            </div>
-
-                            <Accordion>
-                                <AccordionSummary
-                                    expandIcon={<FaCaretDown />}
-                                >
+                                <Accordion>
+                                    <AccordionSummary expandIcon={<FaCaretDown />}>
                                     Game Descriptions
-                                </AccordionSummary>
-                                <AccordionDetails className="flex flex-col gap-5">
-                                    <TextField
-                                        required
-                                        id="description"
-                                        label="Description"
-                                        // defaultValue="description...."
-                                        variant="standard"
-                                        value={steamData.description}
-                                        onChange={handleChange}
-                                        multiline
-                                        rows={10}
-                                        fullWidth
-                                        type="text"
-                                    />
-                                    <TextField
-                                        required
-                                        id="shortDescription"
-                                        label="Short Description"
-                                        // defaultValue="short description...."
-                                        variant="standard"
-                                        value={steamData.shortDescription}
-                                        onChange={handleChange}
-                                        multiline
-                                        rows={4}
-                                        fullWidth
-                                        type="text"
-                                    />
-                                    
-                                    
-
-                                </AccordionDetails>
-                            </Accordion>
-                            <Accordion>
+                                    </AccordionSummary>
+                                    <AccordionDetails className="flex flex-col gap-5">
+                                        <GameDesc gameDb={steamData} handleChange={handleChange} />
+                                    </AccordionDetails>
+                                </Accordion>
+                                <Accordion>
                                 <AccordionSummary
                                     expandIcon={<FaCaretDown />}
                                 >
@@ -361,33 +348,7 @@ export default function SubmitGame() {
                                     Additional Media
                                 </AccordionSummary>
                                 <AccordionDetails className="flex flex-col gap-5">
-                                    <div>
-                                        <InputLabel htmlFor="header image">Header Image</InputLabel>
-                                        <img src={steamData.headerImage} alt=""/>
-                                        <TextField
-                                            required
-                                            id="headerImage"
-                                            variant="standard"
-                                            value={steamData.headerImage}
-                                            onChange={handleChange}
-                                            fullWidth
-                                            type="text"
-                                        />
-                                    </div>
-                                    <div>
-                                        <InputLabel htmlFor="publishers">Capsule Image</InputLabel>
-                                        <img src={steamData.capsuleImage} alt=""/>
-                                        <TextField
-                                            required
-                                            id="capsuleImage"
-                                            variant="standard"
-                                            value={steamData.capsuleImage}
-                                            onChange={handleChange}
-                                            fullWidth
-                                            type="text"
-                                        />
-                                    </div>
-
+                                <AdditionalMedia gameDb={steamData} handleChange={handleChange} />
                                 </AccordionDetails>
                             </Accordion>
                             <Button variant="contained" color="success" type="submit" className="w-1/2 ">Add game to the database</Button>

@@ -1,4 +1,3 @@
-import { parse } from 'dotenv';
 import Game from '../models/game.model.js'
 
 export async function addGame (req, res) {
@@ -10,24 +9,33 @@ export async function addGame (req, res) {
             capsuleImage, steamUrl, releaseDate
         } = req.body;
 
-    const newGame = await Game.create({
-        appId:appId,
-        name:name,
-        description:description,
-        shortDescription:shortDescription,
-        genres:genres,
-        price:price,
-        devs:devs,
-        pubs:pubs,
-        screenshots:screenshots,
-        trailer:trailer,
-        website:website,
-        headerImage:headerImage,
-        capsuleImage:capsuleImage,
-        releaseDate: releaseDate,
-        steamUrl:steamUrl
-    })
-    res.status(200).send(newGame)
+        const game = await Game.findOne({"appId": appId});
+            if (game){
+                console.log(">>> WARNING: Game already Exist");
+                res.status(409).json({
+                    message: "Game already Exist"
+                });
+                return;
+            } 
+
+        const newGame = await Game.create({
+            appId:appId,
+            name:name,
+            description:description,
+            shortDescription:shortDescription,
+            genres:genres,
+            price:price,
+            devs:devs,
+            pubs:pubs,
+            screenshots:screenshots,
+            trailer:trailer,
+            website:website,
+            headerImage:headerImage,
+            capsuleImage:capsuleImage,
+            releaseDate: releaseDate,
+            steamUrl:steamUrl
+        })
+        res.status(200).send(newGame)
     } catch (err){
         console.log(err);
         res.send(err.message)
