@@ -185,12 +185,9 @@ export default function SubmitGame() {
                     }}
                 />
                 <Button variant="contained" onClick={handleClick} color="success" className="w-1/2">Fetch Data</Button>
-                {loading ? <img src="https://www.wpfaster.org/wp-content/uploads/2013/06/loading-gif.gif" className="w-[40px] h-auto" alt=""/> : null}
+                    {loading ? <img src="https://gifdb.com/images/high/classic-pacman-game-white-dots-beit7v8icaisz3d4.gif" className="w-[40px] h-auto" alt=""/> : null}
                     </div>
                     </form>
-
-                {loading ? "Loading...." : ""}
-
 
                 { steamData.name !== "" && (
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-wrap my-3">
