@@ -51,15 +51,13 @@ const gameSchema = new mongoose.Schema({
     website: {
         type: String,
     },
-
     capsuleImage: {
         type: String,
     },
-    timeStamp: {
-        type: Date,
-        default: Date.now
-    }
-});
+    releaseDate:{
+        type: Array
+    },
+}, {timestamps: true});
 
 const Game = mongoose.model('Game', gameSchema);
 export default Game;

@@ -17,7 +17,7 @@ import {useSteamFormInput} from "../hooks/useSteamFormInput.js";
 import {useDeleteMedia} from "../hooks/useDeleteMedia.js";
 import { usePushMedia } from "../hooks/usePushMedia.js";
 import { SmallBlueButton, SmallRedButton } from "./Components/SmallButtons.jsx";
-
+import dayjs from "dayjs";
 
 
 export default function Editor() {
@@ -38,7 +38,8 @@ export default function Editor() {
         screenshots:[],
         genres: [],
         trailer:[],
-        steamUrl: ""
+        steamUrl: "",
+        releaseDate: []
     });
 
 
@@ -385,6 +386,24 @@ export default function Editor() {
                                             onChange={handleChange}
                                             startAdornment={<InputAdornment position="start">₹</InputAdornment>}/>
                                     </div>
+
+                                    <div className="flex flex-col gap-1 flex-wrap">
+                                        <InputLabel htmlFor="Release Date">Release Date</InputLabel>
+                                        {steamData.releaseDate.map((d, index) =>
+                                        <>
+                                        {d.coming_soon ? <p> Coming Soon </p> :
+                                            <Input
+                                                id="date"
+                                                type="date"
+                                                label="date"
+                                                value={dayjs(d?.date).format("YYYY-MM-DD")}
+                                                onChange={handleChange}
+                                                />
+                                        }
+                                        </>
+                                        )}
+                                        {/* 1920290 - barkour not released yet */}
+                                    </div> 
 
                                     <div  className="flex flex-col gap-1 flex-wrap">
                                         <div className="flex flex-row gap-2 items-center">

@@ -89,6 +89,19 @@ export default function Preview() {
                 </div>
 
                 <div className="my-4" >
+                <h2 className="text-2xl mb-2" id="Release Date">Release Date</h2>
+                <p className="max-w-4xl p-2 bg-[rgba(90,136,175,0.5)] rounded-sm">
+                    {steamData.releaseDate.map((d, index)=> (
+                        <span key={index}>
+                        {d.coming_soon ? "Coming soon" : d.date}
+                        </span>
+                    )
+                    )}
+                </p>
+                </div>
+
+
+                <div className="my-4" >
                 <h2 className="text-2xl mb-2" id="Website">Website</h2>
                 {!steamData.website &&(
                     <p>No Website Available</p>
