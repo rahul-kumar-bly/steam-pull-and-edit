@@ -1,24 +1,22 @@
 import {useState, useEffect, use} from "react";
 import {useParams} from "react-router-dom";
-import {Button, TextField, ButtonGroup, IconButton} from "@mui/material";
-import Input from '@mui/material/Input';
-import InputLabel from '@mui/material/InputLabel';
-import InputAdornment from '@mui/material/InputAdornment';
+import {Button, ButtonGroup} from "@mui/material";
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Alert from '@mui/material/Alert'
-import Divider from '@mui/material/Divider';
 import { FaCaretDown } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import {useDeleteMedia} from "../hooks/useDeleteMedia.js";
 import UniversalDialog from './Components/UniversalDialog.jsx';
 import UniversalDialogForm from './Components/UniversalDialogForm.jsx';
 import {useSteamFormInput} from "../hooks/useSteamFormInput.js";
-import {useDeleteMedia} from "../hooks/useDeleteMedia.js";
 import { usePushMedia } from "../hooks/usePushMedia.js";
-import { SmallBlueButton, SmallRedButton } from "./Components/SmallButtons.jsx";
-import dayjs from "dayjs";
-
+import NameInfo from "./Components/Editor UI/NameInfo.jsx";
+import GameDesc from "./Components/Editor UI/GameDesc.jsx";
+import MetaInfo from "./Components/Editor UI/MetaInfo.jsx";
+import MediaComponents from "./Components/Editor UI/MediaComponents.jsx";
+import AdditionalMedia from "./Components/Editor UI/AdditionalMedia.jsx";
 
 export default function Editor() {
     const [gameId, setGameId] = useState(null);
@@ -86,7 +84,6 @@ export default function Editor() {
             if (data) {
                 console.log(steamData);
                 handleGameUpdated();
-                // alert('Game Updated Successfully!');
             } else {
                 console.log('Error in updating data', data.message);
                 setError(`Error in updating data: ${data.message}`);
@@ -102,16 +99,16 @@ export default function Editor() {
 
 
     const handleChange = useSteamFormInput(steamData, setSteamData);
-
-    const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogFormOpen, setDialogFormOpen] = useState(false);
-    const [dialogTitle, setDialogTitle] = useState(null);
-    const [dialogContent, setDialogContent] = useState(null);
     const [dialogFormTitle, setDialogFormTitle] = useState(null);
     const [dialogFormContent, setDialogFormContent] = useState(null);
+    const [dataLabel, setDataLabel] = useState('Value....');
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogTitle, setDialogTitle] = useState(null);
+    const [dialogContent, setDialogContent] = useState(null);
     const [onAgreeHandler, setOnAgreeHandler] = useState(() => () => {});
     const [mxWidth, setMxWidth] = useState("sm");
-    const [dataLabel, setDataLabel] = useState('Value....');
+
 
 
     function handlePreview(){
@@ -139,12 +136,12 @@ export default function Editor() {
                     console.log(steamData);
                     setDialogOpen(false);
                 } else {
-                    console.log('Error in deleting entry', data.message);
+                    console.log('>>> ERROR: Unable to delete entry', data.message);
                     setError(`Error in deleting entry: ${data.message}`);
                 }
 
             } catch (error) {
-                console.log('Error encountered while deleting game', error);
+                console.log('ERROR: Unable to delete entry', error);
                 setError(`Error encountered while deleting game: ${error}`);
             }
         finally {
@@ -155,21 +152,10 @@ export default function Editor() {
 
     };
 
-    // Game updated dialog
-    const handleGameUpdated = () => {
-        setDialogTitle('Game Updated');
-        setDialogContent('Game details have been updated successfully.');
-        setDialogOpen(true);
-        setMxWidth("xs");
-        setOnAgreeHandler(() => () => {
-            setDialogOpen(false);
-        });
-    }
-
     // Produce dialog to confirm deletion of individual screenshot or trailer
     const handleDeleteHook = useDeleteMedia(steamData, setError, setSteamData)
     const handleDeleteMedia = (index, mediaType) => {
-            setDialogTitle('Confirm Delete?');
+            setDialogTitle('Confirm');
             setDialogContent(`Are you sure you want to delete ${steamData[mediaType][index]}? This can't be undo.`);
             setDialogOpen(true);
             setMxWidth("xs")
@@ -184,6 +170,17 @@ export default function Editor() {
                 setDialogOpen(false);
             })
         }
+
+    // Game updated dialog
+    const handleGameUpdated = () => {
+        setDialogTitle('Game Updated');
+        setDialogContent('Game details have been updated successfully.');
+        setDialogOpen(true);
+        setMxWidth("xs");
+        setOnAgreeHandler(() => () => {
+            setDialogOpen(false);
+        });
+    }
 
     // Produce dialog to add new genre or screenshot
     const handlePushHook = usePushMedia(steamData, setError, setSteamData);
@@ -227,7 +224,7 @@ export default function Editor() {
         if (!trailerVidId){
             return 0;
         }
-        console.log('thank you for providing the url', trailerVidId);
+        console.log('>>> INFO: Your ID is', trailerVidId);
         const newTrailer = {
             name: 'new trailer',
             thumbnail:`https://img.youtube.com/vi/${trailerVidId}/hqdefault.jpg`,
@@ -273,67 +270,13 @@ export default function Editor() {
                 { steamData && (
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-wrap">
                         <div  className="flex flex-col gap-4 w-2xl">
-                            <div className="flex flex-col gap-4 w-2xl p-2" style={{backgroundImage: `linear-gradient(rgba(245, 245, 250, 0.85), rgba(235, 235, 240, 0.85))
-                                    , url(${steamData.headerImage})`, backgroundSize: "cover", backgroundPosition: "center"}}>
-                                <TextField
-                                    required
-                                    id="name"
-                                    label="Name"
-                                    // defaultValue="name"
-                                    variant="standard"
-                                    value={steamData.name}
-                                    onChange={handleChange}
-                                    fullWidth
-                                    type="text"
-                                />
-                                <TextField
-                                    required
-                                    id="steamUrl"
-                                    label="Steam Url"
-                                    // defaultValue="https://store.steam.com"
-                                    variant="standard"
-                                    value={steamData.steamUrl}
-                                    onChange={handleChange}
-                                    fullWidth
-                                    type="text"
-                                />
-
-                            </div>
-
+                        <NameInfo gameDb={steamData} handleChange={handleChange} />
                             <Accordion>
-                                <AccordionSummary
-                                expandIcon={<FaCaretDown />}
-                                >
-                                    Game Descriptions
+                                <AccordionSummary expandIcon={<FaCaretDown />}>
+                                Game Descriptions
                                 </AccordionSummary>
                                 <AccordionDetails className="flex flex-col gap-5">
-                                    <TextField
-                                        required
-                                        id="description"
-                                        label="Description"
-                                        // defaultValue="description...."
-                                        variant="standard"
-                                        value={steamData.description}
-                                        onChange={handleChange}
-                                        multiline
-                                        rows={10}
-                                        fullWidth
-                                        type="text"
-                                    />
-                                    <TextField
-                                        required
-                                        id="shortDescription"
-                                        label="Short Description"
-                                        // defaultValue="short description...."
-                                        variant="standard"
-                                        value={steamData.shortDescription}
-                                        onChange={handleChange}
-                                        multiline
-                                        rows={4}
-                                        fullWidth
-                                        type="text"
-                                    />
-
+                                    <GameDesc gameDb={steamData} handleChange={handleChange} />
                                 </AccordionDetails>
                             </Accordion>
                             <Accordion>
@@ -343,119 +286,7 @@ export default function Editor() {
                                     Meta Information
                                 </AccordionSummary>
                                 <AccordionDetails className="flex flex-col gap-5">
-                                    <TextField
-                                        id="website"
-                                        label="Website"
-                                        // defaultValue="https://store.steam.com"
-                                        variant="standard"
-                                        value={steamData.website}
-                                        onChange={handleChange}
-                                        fullWidth
-                                        type="text"
-                                    />
-                                    <div className="flex flex-col gap-1 flex-wrap">
-                                        <div className="flex flex-row gap-2 items-center">
-                                        <InputLabel htmlFor="genres">Genres</InputLabel>
-                                                <SmallBlueButton text="+" tooltip="Add new genre" onClickHandle={handleAddGenre} />
-                                        </div>
-                                        <div className="p-2 bg-slate-200 flex flex-col gap-2">
-                                            {steamData.genres && steamData.genres.map((item, index) => (
-                                                <span key={index} className="flex flex-row items-center gap-10 justify-between">
-                                                <TextField
-                                                    required
-                                                    key={index}
-                                                    id={`genre-${index}`}
-                                                    // defaultValue="genre"
-                                                    variant="standard"
-                                                    value={item}
-                                                    onChange={(e)=> handleChange(e,index)}
-                                                />
-                                                <SmallRedButton text="&times;" tooltip="Delete this genre" onClickHandle={() => handleDeleteMedia(index, "genres")} />
-                                                </span>
-                                            ))}
-                                        </div>
-                                        <div>Reload Genres</div>
-                                    </div>
-                                    <div className="flex flex-col gap-1 flex-wrap">
-                                        <InputLabel htmlFor="price">Price</InputLabel>
-                                        <Input
-                                            id="price"
-                                            type="number"
-                                            label="Price"
-                                            value={steamData.price}
-                                            onChange={handleChange}
-                                            startAdornment={<InputAdornment position="start">₹</InputAdornment>}/>
-                                    </div>
-
-                                    <div className="flex flex-col gap-1 flex-wrap">
-                                        <InputLabel htmlFor="Release Date">Release Date</InputLabel>
-                                        {steamData.releaseDate.map((d, index) =>
-                                        <>
-                                        {d.coming_soon ? <p> Coming Soon </p> :
-                                            <Input
-                                                id="date"
-                                                type="date"
-                                                label="date"
-                                                value={dayjs(d?.date).format("YYYY-MM-DD")}
-                                                onChange={handleChange}
-                                                />
-                                        }
-                                        </>
-                                        )}
-                                        {/* 1920290 - barkour not released yet */}
-                                    </div> 
-
-                                    <div  className="flex flex-col gap-1 flex-wrap">
-                                        <div className="flex flex-row gap-2 items-center">
-                                        <InputLabel htmlFor="developers">Developers</InputLabel>
-                                                <SmallBlueButton text="+" tooltip="Add new developer" onClickHandle={handleAddDevs} />
-                                        </div>
-
-
-                                        <div className="p-2 bg-slate-200 flex flex-col gap-2">
-                                            {steamData.devs && steamData.devs.map((item, index) => (
-                                            <span key={index} className="flex flex-row items-center gap-10 justify-between">
-                                                <TextField
-                                                    required
-                                                    key={index}
-                                                    id={`dev-${index}`}
-                                                    // defaultValue="dev"
-                                                    variant="standard"
-                                                    value={item}
-                                                    onChange={(e)=> handleChange(e,index)}
-                                                />
-                                                <SmallRedButton text="&times;" tooltip="Delete this developer entry" onClickHandle={() => handleDeleteMedia(index, "devs")} />
-                                            </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div  className="flex flex-col gap-1 flex-wrap">
-
-
-                                        <div className="flex flex-row gap-2 items-center">
-                                                <InputLabel htmlFor="publishers">Publishers</InputLabel>
-                                                <SmallBlueButton text="+" tooltip="Add new publisher" onClickHandle={handleAddPubs} />
-                                        </div>
-
-
-                                        <div className="p-2 flex flex-col bg-slate-200 gap-2">
-                                            {steamData.pubs && steamData.pubs.map((item, index) => (
-                                                <span key={index} className="flex flex-row items-center gap-10 justify-between">
-                                                    <TextField
-                                                        required
-                                                        fullWidth
-                                                        key={index}
-                                                        id={`pub-${index}`}
-                                                        // defaultValue="dev"
-                                                        variant="standard"
-                                                        value={item}
-                                                        onChange={(e)=> handleChange(e,index)}
-                                                    />
-                                                    <SmallRedButton text="&times;" tooltip="Delete this publisher entry" onClickHandle={() => handleDeleteMedia(index, "pubs")} />
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
+                                    <MetaInfo gameDb={steamData} handleChange={handleChange} handleDeleteMedia={handleDeleteMedia} handleAddDevs={handleAddDevs} handleAddGenre={handleAddGenre} handleAddPubs={handleAddPubs}/>
                                 </AccordionDetails>
                             </Accordion>
                             <Accordion>
@@ -465,48 +296,7 @@ export default function Editor() {
                                     Media (Screenshots & Trailers)
                                 </AccordionSummary>
                                 <AccordionDetails className="flex flex-col gap-5">
-                                    <div className="flex flex-row gap-2 items-center">
-                                        <InputLabel htmlFor="screenshots">Screenshots</InputLabel>
-                                        <SmallBlueButton text="+" tooltip="Add new screenshot" onClickHandle={handleAddScreenshot} />
-                                    </div>
-
-                                    <div className="flex flex-row gap-3 flex-wrap">
-                                        {steamData.screenshots.length === 0 &&(
-                                            <p>No screenshots are available.</p>
-                                        )}
-                                        {steamData.screenshots && steamData.screenshots.map((screenshot, index) => (
-                                            <div key={index}  className="w-1/4 h-auto cursor-pointer transition-transform hover:scale-105 relative">
-                                                <img src={screenshot} alt=""/>
-                                                <SmallRedButton 
-                                                    classProps="absolute top-1 right-1 flex items-center justify-center " 
-                                                    text="&times;" 
-                                                    tooltip="Delete this screenshot" 
-                                                    onClickHandle={() => handleDeleteMedia(index, "screenshots")} 
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <Divider />
-                                    <InputLabel htmlFor="trailers">Trailers</InputLabel>
-                                    <div className="flex flex-col flex-wrap gap-2 max-w-full">
-                                        {steamData.trailer && steamData.trailer.map((item,index) => (
-                                            <div className="w-1/3 h-auto relative" key={index}>
-                                                {(item.trailer.includes('youtube.com')) &&(
-                                                    <iframe className="w-full" src={`${item.trailer.replace('watch?v=', 'embed/')}`} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                                                )}
-                                                {(!item.trailer.includes('youtube.com'))&&(
-                                                <video poster={item.thumbnail}  src={item.trailer} controls title={item.name}/>
-                                                )}
-                                                <SmallRedButton 
-                                                    classProps="absolute top-1 right-1 flex items-center justify-center cursor-pointer" 
-                                                    text="&times;" 
-                                                    tooltip="Delete this Trailer" 
-                                                    onClickHandle={() => handleDeleteMedia(index, "trailer")} 
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <Button type="button" variant="contained" onClick={handleAddTrailer}>Add New Trailer</Button>
+                                    <MediaComponents gameDb={steamData} handleAddScreenshot={handleAddScreenshot} handleAddTrailer={handleAddTrailer} handleDeleteMedia={handleDeleteMedia} />
                                 </AccordionDetails>
                             </Accordion>
 
@@ -517,40 +307,7 @@ export default function Editor() {
                                     Additional Media
                                 </AccordionSummary>
                                 <AccordionDetails className="flex flex-col gap-5">
-                                    <div>
-                                        <InputLabel htmlFor="header image">Header Image</InputLabel>
-                                        {
-                                            steamData.headerImage &&(
-                                                <img src={steamData.headerImage} alt=""/>
-                                            )
-                                        }
-
-                                        <TextField
-                                            required
-                                            id="headerImage"
-                                            variant="standard"
-                                            value={steamData.headerImage}
-                                            onChange={handleChange}
-                                            fullWidth
-                                            type="text"
-                                        />
-                                    </div>
-                                    <div>
-                                        <InputLabel htmlFor="publishers">Capsule Image</InputLabel>
-                                        {steamData.capsuleImage &&(
-                                            <img src={steamData.capsuleImage} alt=""/>
-                                        )}
-                                        <TextField
-                                            required
-                                            id="capsuleImage"
-                                            variant="standard"
-                                            value={steamData.capsuleImage}
-                                            onChange={handleChange}
-                                            fullWidth
-                                            type="text"
-                                        />
-                                    </div>
-
+                                <AdditionalMedia gameDb={steamData} handleChange={handleChange} />
                                 </AccordionDetails>
                             </Accordion>
                             <div className="flex flex-row p-2 fixed right-0 bottom-0 mx-5 border-1 border-b-0 bg-white">
