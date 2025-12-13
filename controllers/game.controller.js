@@ -94,3 +94,17 @@ export async function deleteGame (req, res) {
     }
 
 }
+
+export async function deleteGames(req, res) {
+    try{
+        const documentIds = req.body;
+        console.log(">>> Selected IDs are", documentIds);
+        const games = await Game.deleteMany({
+            _id: {$in:documentIds.selectedIds}
+        })
+        res.status(200).json({message:`games deleted successfully ${games.deletedCount}`})
+    } catch (err){
+        console.log(">>> Error is", err);
+        res.status(404).send('Games not found');
+    }
+}
