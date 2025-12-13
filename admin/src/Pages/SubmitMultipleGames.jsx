@@ -6,7 +6,6 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { FaSteamSymbol } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import dayjs from "dayjs";
 
 export default function SubmitMultipleGames() {
 

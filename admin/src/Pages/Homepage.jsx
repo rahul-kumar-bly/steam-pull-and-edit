@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react";
 import {useNavigate, Link} from "react-router-dom";
-import {Button, ButtonGroup, Checkbox, selectClasses} from "@mui/material";
+import {Button, ButtonGroup, Checkbox} from "@mui/material";
 
 export default function AllGames() {
 
@@ -36,22 +36,35 @@ export default function AllGames() {
         navigate(location)
     }
 
+    const handleReset = async => {
+        if (!selectedIds.length){
+            console.info('>>> WARNING: Nothing to reset!');
+            return;
+        }
+        setSelectedIds([]);
+    }
+
     const handleDelete = async () => {
-            try {
-                const res = await fetch(`/api/game/deletemany`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({selectedIds}),
-                });
-                const data = await res.json();
-                console.log(">>> UPDATE: deleted successfully", data);
-                // refreshPage();
-                setTrigger(true);
-                setSelectedIds([]);
-            } catch (err) {
-                console.log(">>> ERROR:", err);
-            }
- 
+        if (!selectedIds.length){
+            console.info('>>> WARNING: No selected items to delete!');
+            return;
+        }
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/game/deletemany`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({selectedIds}),
+            });
+            const data = await res.json();
+            console.log(">>> UPDATE: deleted successfully", data);
+            setTrigger(true);
+            setSelectedIds([]);
+            setLoading(false);
+        } catch (err) {
+            console.log(">>> ERROR:", err);
+            setLoading(false);
+        }
     }
 
     const handleCheckboxChange=(event)=>{
@@ -74,7 +87,6 @@ export default function AllGames() {
 
     console.log('>>> Targets are', selectedIds);
     return (
-
         <div className="flex flex-row gap-3 flex-wrap p-5 mx-50 justify-center">
             <div className="flex flex-col">
             <h1 className="text-5xl text-center">SteamFetchAPI</h1>
@@ -95,17 +107,15 @@ export default function AllGames() {
             ))}
 
             </div>
-                    <div className="flex flex-row gap-3 flex-wrap p-5 mx-20 justify-center">
+            <div className="flex flex-row gap-3 flex-wrap p-5 mx-20 justify-center">
             {selectedIds && (
-                <div className="flex-wrap flex flex-col gap-2">
-                <Button variant="contained" type="button" onClick={()=>handleDelete()} className="w-[200px]">Delete Selected</Button>
-                </div>
+                <ButtonGroup>
+                    <Button variant="contained" type="button" color="success" onClick={handleDelete} className="w-[200px]">Delete Selected</Button>
+                    <Button variant="contained" color="warning" type="reset" onClick={handleReset} className="w-[200px]">Clear Selection</Button>
+                </ButtonGroup>
             )}
         </div>
-
-            </div>
-
-
+        </div>
         </div>
 
     )
