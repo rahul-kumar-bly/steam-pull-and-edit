@@ -34,9 +34,8 @@ export default function MetaInfo({
                                                     required
                                                     key={index}
                                                     id={`genre-${index}`}
-                                                    // defaultValue="genre"
                                                     variant="standard"
-                                                    value={item}
+                                                    value={item || ""}
                                                     onChange={(e)=> handleChange(e,index)}
                                                 />
                                                 <SmallRedButton text="&times;" tooltip="Delete this genre" onClickHandle={() => handleDeleteMedia(index, "genres")} />
@@ -51,7 +50,7 @@ export default function MetaInfo({
                                             id="price"
                                             type="number"
                                             label="Price"
-                                            value={gameDb.price}
+                                            value={gameDb.price || ""}
                                             onChange={handleChange}
                                             startAdornment={<InputAdornment position="start">₹</InputAdornment>}
                                                 />
@@ -66,7 +65,7 @@ export default function MetaInfo({
                                                 id="date"
                                                 type="date"
                                                 label="date"
-                                                value={dayjs(d?.date).format("YYYY-MM-DD")}
+                                                value={dayjs(d?.date).format("YYYY-MM-DD") || []}
                                                 onChange={handleChange}
                                                 />
                                         }
@@ -89,9 +88,8 @@ export default function MetaInfo({
                                                     required
                                                     key={index}
                                                     id={`dev-${index}`}
-                                                    // defaultValue="dev"
                                                     variant="standard"
-                                                    value={item}
+                                                    value={item || ""}
                                                     onChange={(e)=> handleChange(e,index)}
                                                 />
                                                 <SmallRedButton text="&times;" tooltip="Delete this developer entry" onClickHandle={() => handleDeleteMedia(index, "devs")} />
@@ -118,7 +116,7 @@ export default function MetaInfo({
                                                         id={`pub-${index}`}
                                                         // defaultValue="dev"
                                                         variant="standard"
-                                                        value={item}
+                                                        value={item || ""}
                                                         onChange={(e)=> handleChange(e,index)}
                                                     />
                                                     <SmallRedButton text="&times;" tooltip="Delete this publisher entry" onClickHandle={() => handleDeleteMedia(index, "pubs")} />

@@ -1,44 +1,46 @@
 import Game from '../models/game.model.js'
 
+
 export async function addGame (req, res) {
     try {
-        const {
-            appId, name, description, shortDescription,
-            genres, price, devs,
-            pubs, screenshots, trailer, website, headerImage,
-            capsuleImage, steamUrl, releaseDate
-        } = req.body;
-
-        const game = await Game.findOne({"appId": appId});
-            if (game){
-                console.log(">>> WARNING: Game already Exist");
-                res.status(409).json({
-                    message: "Game already Exist"
-                });
-                return;
-            } 
-
-        const newGame = await Game.create({
-            appId:appId,
-            name:name,
-            description:description,
-            shortDescription:shortDescription,
-            genres:genres,
-            price:price,
-            devs:devs,
-            pubs:pubs,
-            screenshots:screenshots,
-            trailer:trailer,
-            website:website,
-            headerImage:headerImage,
-            capsuleImage:capsuleImage,
-            releaseDate: releaseDate,
-            steamUrl:steamUrl
-        })
-        res.status(200).send(newGame)
+        const {steamData} = req.body;
+        const newGame = await Game.create(steamData);
+        if (newGame){
+            console.log('newGame data entry ', newGame);
+            return res.status(201).send(newGame);
+        }
     } catch (err){
+        if (err.code === 11000){
+            console.log('>>> ERROR: Duplicate key error, appId already exist');
+            return res.status(409).send(`Game already exist!`);
+        }
+        return res.status(500).send(err.message);
+    }
+}
+
+export async function addMany (req, res) {
+    const dups = [];
+    try {
+        const {gameDatabase} = req.body;
+        await gameDatabase.map((d)=>{
+            const game = Game.findOne({"appId": d.appId})
+            if (game){
+                dups.push(d.appId);
+            }
+        });
+        const filteredGames = gameDatabase.filter(data => data.appId);
+        const newGames = await Game.insertMany(filteredGames);
+        if (newGames){
+            return res.status(200).send(newGames)
+        }
+    } catch (err){
+        if (err.code === 11000){
+            const appIds = err.message;
+            console.log('>>> ERROR: Duplicate key error, appId already exist', dups);
+            return res.status(409).send(`Games already exist!: ${dups.filter(d=> d!=="")}`);
+        }
         console.log(err);
-        res.send(err.message)
+        return res.status(500).send(err.message);
     }
 }
 

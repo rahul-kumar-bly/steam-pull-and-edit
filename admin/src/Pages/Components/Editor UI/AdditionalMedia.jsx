@@ -18,7 +18,7 @@ export default function AdditionalMedia({
                                             required
                                             id="headerImage"
                                             variant="standard"
-                                            value={gameDb.headerImage}
+                                            value={gameDb.headerImage || ""}
                                             onChange={handleChange}
                                             fullWidth
                                             type="text"
@@ -33,7 +33,7 @@ export default function AdditionalMedia({
                                             required
                                             id="capsuleImage"
                                             variant="standard"
-                                            value={gameDb.capsuleImage}
+                                            value={gameDb.capsuleImage || ""}
                                             onChange={handleChange}
                                             fullWidth
                                             type="text"

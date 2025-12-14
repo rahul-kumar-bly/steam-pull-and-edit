@@ -17,6 +17,8 @@ import NameInfo from "./Components/Editor UI/NameInfo.jsx";
 import GameDesc from "./Components/Editor UI/GameDesc.jsx";
 import AdditionalMedia from "./Components/Editor UI/AdditionalMedia.jsx";
 import UniversalDialog from "./Components/UniversalDialog.jsx";
+import sanitizedData from "../methods/sanitizedData.js";
+import axios from "axios";
 
 export default function SubmitGame() {
 
@@ -30,28 +32,21 @@ export default function SubmitGame() {
     const [dialogContent, setDialogContent] = useState(null);
     const [onAgreeHandler, setOnAgreeHandler] = useState(() => () => {});
     const [dialogWidth, setDialogWidth] = useState("sm");
+    const [gameDatabase, setGameDatabase] = useState([])
 
+    const gameApi = axios.create({
+        baseURL: `/api/game`,
+        timeout: 3000
+    })
 
-    const [steamData, setSteamData] = useState({
-        appId: "",
-        name: "",
-        description: "",
-        shortDescription: "",
-        price:0,
-        devs:[],
-        pubs:[],
-        website:[],
-        headerImage:"",
-        capsuleImage:"",
-        screenshots:[],
-        genres: [],
-        trailer:[],
-        releaseDate:[],
-        steamUrl: ""
-    });
+    const steamApi = axios.create({
+        baseURL: `/api/steam`,
+        timeout: 3000
+    })
+
 
     const navigate = useNavigate();
-    const handleChange = useSteamFormInput(steamData, setSteamData);
+    const handleChange = useSteamFormInput(gameDatabase, setGameDatabase);
 
     const handleGamePushed = () => {
         setDialogTitle('Game Added');
@@ -79,21 +74,18 @@ export default function SubmitGame() {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await fetch(`/api/game/add`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(steamData),
-            });
-            const data = await res.json();
-            if (res.status === 200) {
-                console.log(data);
-                handleGamePushed();
-            } else {
-                handleGamePushedError(data.message + ". Click Agree to go back to Homepage.");
-                console.log('Error in fetching data', data.message);
-                setError(`Error in fetching data: ${data.message}`);
-            }
+            const {data} = await gameApi.post(`/add`, {
+                gameDatabase
+            })
+            console.log(">>> INFO: data is", data);
+            handleGamePushed();
         } catch (error) {
+            handleGamePushedError(
+                <>
+                Error: {error?.response?.status} {error?.response?.data || error.message} <br />
+                Click Agree to go back to Homepage.
+                </>
+            );
             console.log('Error encountered while creating game', error);
             setError(`Error encountered while creating game: ${error}`);
         } finally {
@@ -104,7 +96,6 @@ export default function SubmitGame() {
 
     const handleIdChange = async (e)   => {
         const id = e.target.value;
-        console.log(id);
         setGameId(id);
     }
 
@@ -113,34 +104,12 @@ export default function SubmitGame() {
         setError(null);
         if (gameId){
             try {
-                const res = await fetch(`/api/steam/get/${gameId}`)
-                if (!res.ok){
-                    setError(`Error in getting response: ${res.statusText}`);
-                    return;
-                }
-                const gameData = await res.json();
-                if(!gameData){
-                    setError(`Error in fetching data`);
-                    return;
-                }
-                const fetchData = gameData[gameId].data
-                setSteamData({
-                    appId: gameId || "",
-                    name: fetchData.name || "",
-                    description: fetchData.detailed_description || "",
-                    shortDescription: fetchData.short_description || "",
-                    price: parseInt(fetchData.price_overview?.final_formatted?.replace("₹", "").replace(",", "")) || 0,
-                    devs: fetchData.developers || [],
-                    pubs: fetchData.publishers || [],
-                    website: fetchData.website || "",
-                    headerImage: fetchData.header_image || "",
-                    capsuleImage: fetchData.capsule_image || "",
-                    screenshots: fetchData.screenshots?.map(s => s.path_thumbnail) || [],
-                    genres: fetchData.genres?.map(g => g.description) || [],
-                    trailer: fetchData.movies?.map(m => ({ thumbnail: m.thumbnail, trailer: m.dash_h264, name: m.name })) || [],
-                    releaseDate: fetchData.release_date || [],
-                    steamUrl: `https://store.steampowered.com/app/${gameId}`
-                });
+                const {data} = await steamApi.get(`/get/${gameId}`);
+                const fetchedData = data[gameId].data
+                console.log(">>> INFO: fetchedData is", fetchedData);
+                const sanitized = sanitizedData(fetchedData);
+                console.log(">>> INFO: sanitizedData is", sanitized);
+                setGameDatabase(sanitized);
             } catch (error) {
                 console.log('error is', error);
                 setError(error);
@@ -151,7 +120,7 @@ export default function SubmitGame() {
             setError(`Enter an ID to begin fetching data`);
             setLoading(false);
         }
-            console.log(steamData)
+            console.log(gameDatabase)
     }
 
     return (
@@ -189,17 +158,16 @@ export default function SubmitGame() {
                     </div>
                     </form>
 
-                { steamData.name !== "" && (
+                {gameDatabase.appId && (
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-wrap my-3">
                         <div  className="flex flex-col gap-4 w-2xl">
-                        <NameInfo gameDb={steamData} handleChange={handleChange} />
-
+                        <NameInfo gameDb={gameDatabase} handleChange={handleChange} />
                                 <Accordion>
                                     <AccordionSummary expandIcon={<FaCaretDown />}>
                                     Game Descriptions
                                     </AccordionSummary>
                                     <AccordionDetails className="flex flex-col gap-5">
-                                        <GameDesc gameDb={steamData} handleChange={handleChange} />
+                                        <GameDesc gameDb={gameDatabase} handleChange={handleChange} />
                                     </AccordionDetails>
                                 </Accordion>
                                 <Accordion>
@@ -212,9 +180,8 @@ export default function SubmitGame() {
                                     <TextField
                                         id="website"
                                         label="Website"
-                                        // defaultValue="https://store.steam.com"
                                         variant="standard"
-                                        value={steamData.website}
+                                        value={gameDatabase.website || ""}
                                         onChange={handleChange}
                                         fullWidth
                                         type="text"
@@ -222,14 +189,13 @@ export default function SubmitGame() {
                                     <div className="flex flex-col gap-1 flex-wrap">
                                         <InputLabel htmlFor="genres">Genres</InputLabel>
                                         <div className="p-2 bg-slate-200 flex flex-col gap-2">
-                                            {steamData.genres && steamData.genres.map((item, index) => (
+                                            {gameDatabase.genres && gameDatabase.genres.map((item, index) => (
                                                 <TextField
                                                     required
                                                     key={index}
                                                     id={`genre-${index}`}
-                                                    // defaultValue="genre"
                                                     variant="standard"
-                                                    value={item}
+                                                    value={item || ""}
                                                     onChange={(e)=> handleChange(e,index)}
 
                                                 />
@@ -242,7 +208,7 @@ export default function SubmitGame() {
                                             id="price"
                                             type="number"
                                             label="Price"
-                                            value={steamData.price}
+                                            value={gameDatabase.price || ""}
                                             onChange={handleChange}
                                             startAdornment={<InputAdornment position="start">₹</InputAdornment>}/>
                                     </div>
@@ -250,15 +216,15 @@ export default function SubmitGame() {
                                     <div className="flex flex-col gap-1 flex-wrap">
                                         <InputLabel htmlFor="Release Date">Release Date</InputLabel>
 
-                                        {steamData.releaseDate?.date && (
+                                        {gameDatabase.releaseDate?.date && (
                                         <>
                                         {
-                                            steamData.releaseDate.coming_soon ? <p> Coming Soon </p> :
+                                            gameDatabase.releaseDate.coming_soon ? <p> Coming Soon </p> :
                                             <Input
                                                 id="date"
                                                 type="date"
                                                 label="date"
-                                                value={dayjs(steamData.releaseDate?.date).format("YYYY-MM-DD")}
+                                                value={dayjs(gameDatabase.releaseDate?.date).format("YYYY-MM-DD") || []}
                                                 onChange={handleChange}
                                                 />
 
@@ -272,14 +238,13 @@ export default function SubmitGame() {
                                         <InputLabel htmlFor="developers">Developers</InputLabel>
 
                                         <div className="p-2 bg-slate-200 flex flex-col gap-2">
-                                            {steamData.devs && steamData.devs.map((item, index) => (
+                                            {gameDatabase.devs && gameDatabase.devs.map((item, index) => (
                                                 <TextField
                                                     required
                                                     key={index}
                                                     id={`dev-${index}`}
-                                                    // defaultValue="dev"
                                                     variant="standard"
-                                                    value={item}
+                                                    value={item || ""}
                                                     onChange={(e)=> handleChange(e,index)}
 
                                                 />
@@ -289,23 +254,20 @@ export default function SubmitGame() {
                                     <div  className="flex flex-col gap-1 flex-wrap">
                                         <InputLabel htmlFor="publishers">Publishers</InputLabel>
                                         <div className="p-2 flex flex-col bg-slate-200 gap-2">
-                                            {steamData.pubs && steamData.pubs.map((item, index) => (
+                                            {gameDatabase.pubs && gameDatabase.pubs.map((item, index) => (
                                                 <TextField
                                                     required
                                                     fullWidth
                                                     key={index}
                                                     id={`pub-${index}`}
-                                                    // defaultValue="dev"
                                                     variant="standard"
-                                                    value={item}
+                                                    value={item || ""}
                                                     onChange={(e)=> handleChange(e,index)}
 
                                                 />
                                             ))}
                                         </div>
-
                                     </div>
-
 
                                 </AccordionDetails>
                             </Accordion>
@@ -318,7 +280,7 @@ export default function SubmitGame() {
                                 <AccordionDetails className="flex flex-col gap-5">
                                     <InputLabel htmlFor="screenshots">Screenshots</InputLabel>
                                     <div className="flex flex-row gap-3 flex-wrap">
-                                        {steamData.screenshots && steamData.screenshots.map((screenshot, index) => (
+                                        {gameDatabase.screenshots && gameDatabase.screenshots.map((screenshot, index) => (
                                             <div key={index} className="w-1/4 h-auto cursor-pointer transition-transform hover:scale-105">
                                                 <img src={screenshot} alt="" />
                                             </div>
@@ -328,7 +290,7 @@ export default function SubmitGame() {
 
                                     <InputLabel htmlFor="trailers">Trailers</InputLabel>
                                     <div className="flex flex-row flex-wrap gap-2">
-                                        {steamData.trailer && steamData.trailer.map((item, index) => (
+                                        {gameDatabase.trailer && gameDatabase.trailer.map((item, index) => (
                                             <div key={index} className="w-1/3 h-auto">
                                                 <video poster={item.thumbnail}  src={item.trailer} controls title={item.name}/>
                                             </div>
@@ -345,7 +307,7 @@ export default function SubmitGame() {
                                     Additional Media
                                 </AccordionSummary>
                                 <AccordionDetails className="flex flex-col gap-5">
-                                <AdditionalMedia gameDb={steamData} handleChange={handleChange} />
+                                <AdditionalMedia gameDb={gameDatabase} handleChange={handleChange} />
                                 </AccordionDetails>
                             </Accordion>
                             <Button variant="contained" color="success" type="submit" className="w-1/2 ">Add game to the database</Button>

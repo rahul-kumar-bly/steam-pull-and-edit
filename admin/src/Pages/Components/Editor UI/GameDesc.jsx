@@ -11,7 +11,7 @@ export default function GameDesc({
                 id="description"
                 label="Description"
                 variant="standard"
-                value={gameDb.description}
+                value={gameDb.description || ""}
                 onChange={handleChange}
                 multiline
                 rows={10}
@@ -23,7 +23,7 @@ export default function GameDesc({
                 id="shortDescription"
                 label="Short Description"
                 variant="standard"
-                value={gameDb.shortDescription}
+                value={gameDb.shortDescription || ""}
                 onChange={handleChange}
                 multiline
                 rows={4}
