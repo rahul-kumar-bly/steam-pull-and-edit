@@ -1,9 +1,10 @@
 import express from "express";
-import {addGame, fetchGame, fetchGames, updateGame, deleteGame, deleteGames} from "../controllers/game.controller.js";
+import {addGame, addMany, fetchGame, fetchGames, updateGame, deleteGame, deleteGames} from "../controllers/game.controller.js";
 
 const router = express.Router();
 
 router.post('/add', addGame)
+router.post('/addmany', addMany)
 router.get("/fetch/:id", fetchGame)
 router.get("/fetchall", fetchGames)
 router.post("/update/:id", updateGame)
