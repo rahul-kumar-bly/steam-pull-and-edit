@@ -1,4 +1,3 @@
-import { IoIosCloseCircle } from "react-icons/io";
 import {useState, useEffect} from "react";
 import { SmallRedButton } from "../../Components/SmallButtons.jsx";
 
