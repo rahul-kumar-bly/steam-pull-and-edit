@@ -15,12 +15,11 @@ const sanitizedData = (gData) => ({
         genres: gData.genres?.map(g => g.description) || [],
         trailer: gData.movies?.map(m => ({
             thumbnail: m.thumbnail,
-            trailer: m.dash_h264,
+            trailer: m.hls_h264,
             name: m.name
         })) || [],
         releaseDate: gData.release_date || [],
         steamUrl: `https://store.steampowered.com/app/${gData.steam_appid}`
     });
 
-
-    export default sanitizeData;
+    export default sanitizedData;
