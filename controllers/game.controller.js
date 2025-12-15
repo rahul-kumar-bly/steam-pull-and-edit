@@ -3,8 +3,8 @@ import Game from '../models/game.model.js'
 
 export async function addGame (req, res) {
     try {
-        const {steamData} = req.body;
-        const newGame = await Game.create(steamData);
+        const {gameDatabase} = req.body;
+        const newGame = await Game.create(gameDatabase);
         if (newGame){
             console.log('newGame data entry ', newGame);
             return res.status(201).send(newGame);
@@ -14,6 +14,7 @@ export async function addGame (req, res) {
             console.log('>>> ERROR: Duplicate key error, appId already exist');
             return res.status(409).send(`Game already exist!`);
         }
+        console.log(">>> ERROR: ", err);
         return res.status(500).send(err.message);
     }
 }

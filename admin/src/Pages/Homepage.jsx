@@ -129,7 +129,7 @@ export default function AllGames() {
                             <h2 className="overflow-ellipsis truncate w-[210px]">{item.name}</h2>
                             <Checkbox checked={selectedIds.includes(item._id)} name={item._id} onChange={handleCheckboxChange} />
                         </div>
-                            <img src={item.capsuleImage} className="w-[250px]"/>
+                            <img src={item.capsuleImage} className="w-[250px]" title={item?.appId} alt={item.name}/>
                         <div className="justify-center flex mt-1">
                         <ButtonGroup variant="contained" aria-label="Basic button group">
                             <Button onClick={()=>navigateTo(`/edit/${item._id}`)} variant="contained" color="success" type="submit" className="rounded-sm p-2 bg-green-500 w-1/2 cursor-pointer hover:opacity-90">Update</Button>

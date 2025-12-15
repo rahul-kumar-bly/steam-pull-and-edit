@@ -1,6 +1,7 @@
 import React from "react";
 import {useState, useEffect} from "react";
 import {useNavigate, useParams} from "react-router-dom";
+import Screenshots from "./Components/Preview UI/Screenshot";
 
 
 export default function Preview() {
@@ -41,7 +42,7 @@ export default function Preview() {
         }, [params.id]);
 
     return (
-        <div className="min-h-screen flex flex-col items-center bg-[#151515] text-white  text-center">
+        <div className="flex flex-col bg-[#151515] text-white  text-center">
         {
             steamData && (
             <div className="my-4 flex flex-col items-center ">
@@ -66,12 +67,12 @@ export default function Preview() {
 
                 <div className="my-4">
                 <h2 className="text-2xl mb-2" id="Capsule_Image">Capsule Image</h2>
-                <img src={steamData.capsuleImage}/>
+                <img src={steamData.capsuleImage || null}/>
                 </div>
 
                 <div className="my-4">
                 <h2 className="text-2xl mb-2" id="Header_Image">Header Image</h2>
-                <img src={steamData.headerImage}/>
+                <img src={steamData.headerImage || null}/>
                 </div>
 
                 <div className="my-4">
@@ -157,15 +158,12 @@ export default function Preview() {
                 </div>
 
                 
-
                 <div className="my-4">
                     {steamData.screenshots && steamData.screenshots.length > 0 && (
-                        <div className="my-4 max-w-6xl">
+                        <div className="my-4 max-w-5xl">
                             <h2 className="text-2xl mb-2"  id="Screenshots">Screenshots</h2>
-                            <div className="flex flex-row gap-3 overflow-x-auto my-2">
-                                {steamData.screenshots.map((screenshot, index) => (
-                                    <img key={index} src={screenshot} className="w-[400px] rounded-sm"/>
-                                ))}
+                            <div className="grid grid-cols-5 gap-3 overflow-x-auto my-2">
+                                    <Screenshots screenshots={steamData.screenshots} />
                                 </div>
                         </div>
                                 )}
@@ -177,18 +175,17 @@ export default function Preview() {
                         <p>No Trailers Available</p>
                     )}
                     {steamData.trailer && steamData.trailer.length > 0 && (
-                        <div className="my-4 max-w-6xl">
-                            <div className="flex flex-row gap-3 overflow-x-auto my-2">
+                        <div className="my-4 max-w-5xl">
+                            <div className="grid grid-cols-4 gap-3  my-2">
                                 {steamData.trailer.map((item, index) => (
-                                    <>
-                                    {(item.trailer.includes('youtube.com')) &&(
-                                        <iframe className="w-full" src={`${item.trailer.replace('watch?v=', 'embed/')}`} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                                    )}
-                                    {(!item.trailer.includes('youtube.com'))&&(
-                                    <video poster={item.thumbnail}  src={item.trailer} controls title={item.name}/>
-                                    )}
-
-                                    </>
+                                    <div key={index}>
+                                        {(item.trailer.includes('youtube.com')) &&(
+                                            <iframe className="w-full" src={`${item.trailer.replace('watch?v=', 'embed/')}` || null} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                                        )}
+                                        {(!item.trailer.includes('youtube.com'))&&(
+                                        <video poster={item.thumbnail} className="w-full" src={item.trailer || null} title={item.name} controls/>
+                                        )}
+                                    </div>
 
                                 ))}
                                 </div>
@@ -198,7 +195,7 @@ export default function Preview() {
 
                 <div className="my-4">
                 <h2 className="text-2xl mb-2" id="Description">Description</h2>
-                    <div id="product_desc" className="max-w-2xl text-center overflow-y-scroll p-2 max-h-[800px]" dangerouslySetInnerHTML={{__html: steamData.description}} />
+                    <div id="product_desc" className="max-w-2xl text-center p-2 " dangerouslySetInnerHTML={{__html: steamData.description}} />
                 </div>
             </div>
 
