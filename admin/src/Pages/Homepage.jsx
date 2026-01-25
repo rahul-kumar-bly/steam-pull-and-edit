@@ -22,7 +22,7 @@ export default function AllGames() {
         async function fetchAllGames () {
             setLoading(true);
             try {
-                const res = await fetch(`/api/game/fetchall`)
+                const res = await fetch(`/api/game/fetchall`);
                 const games = await res.json()
                 setGames(games)
                 console.log(games)
@@ -64,6 +64,8 @@ export default function AllGames() {
         setDialogOpen(true);
         setOnAgreeHandler(() => async ()  => {
         try {
+            setGames(prev => prev.filter(game => !selectedIds.includes(game.appId)));
+            setTrigger(true);
             const res = await fetch(`/api/game/deletemany`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
@@ -71,7 +73,6 @@ export default function AllGames() {
             });
             const data = await res.json();
             console.log(">>> UPDATE: deleted successfully", data);
-            setTrigger(true);
             setSelectedIds([]);
             setDialogOpen(false);
             setLoading(false);

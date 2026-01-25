@@ -1,19 +1,27 @@
 import axios from "axios";
+// import { gameCache } from "../utils/steamCache.js";
+
+// cache code added but commented; will enable in production
 
 export async function getSteamJsonData(req, res){
     try {
         const appId = req.params.id;
-        const steamRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}`)
-        const data = await steamRes.json();
-        if(data[appId]['success']){
-            res.status(200).send(data)
-        } else {
-            res.status(404).send(`Unable to fetch data for this game ${appId}`);
-        }
+        // const cachedGame = gameCache.get(appId);
+        // if (cachedGame) {
+        //   console.log(">>> INFO: using cached data for", appId);
+        //   return res.status(200).send(cachedGame);          
+        // }
+        console.log(">>> Fetching ID", appId);
+        const response = await axios.get(`https://store.steampowered.com/api/appdetails?appids=${appId}`)
+        const game = response.data[String(appId)];
+        const gameData = game?.success ? game.data : null;
+        // gameCache.set(appId, gameData);
+        // console.log("Cache set for appId", appId);
+        return res.status(200).send(gameData);
     }
     catch (err) {
         console.log(err);
-        res.send(err.message)
+        return res.send(err.message);
     }
 }
 
@@ -32,13 +40,21 @@ export async function getSteamBatchJsonData(req, res) {
   try {
     for (const id of ids) {
       console.log(">>> Fetching ID", id);
+      // const cachedGame = gameCache.get(id);
+      // if (cachedGame) {
+      //   console.log(">>> INFO: using cached data for", id);
+      //   results.push(cachedGame);
+      //   continue
+      // }
       try {
         const response = await axios.get(
           `https://store.steampowered.com/api/appdetails?appids=${id}`, {
             timeout: 2000
           });
         const game = response.data[String(id)];
-        results.push(game?.success ? game.data : null);
+        const gameData = game?.success ? game.data : null;
+        // gameCache.set(id, gameData);
+        results.push(gameData);
       } catch (err) {
         console.error(">>> Steam failed for", id);
         results.push({
