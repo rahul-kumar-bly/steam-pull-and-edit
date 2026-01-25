@@ -105,9 +105,8 @@ export default function SubmitGame() {
         if (gameId){
             try {
                 const {data} = await steamApi.get(`/get/${gameId}`);
-                const fetchedData = data[gameId].data
-                console.log(">>> INFO: fetchedData is", fetchedData);
-                const sanitized = sanitizedData(fetchedData);
+                console.log(">>> INFO: data:", data);
+                const sanitized = sanitizedData(data);
                 console.log(">>> INFO: sanitizedData is", sanitized);
                 setGameDatabase(sanitized);
             } catch (error) {

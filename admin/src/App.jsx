@@ -7,6 +7,8 @@ import Footer from "./Pages/Components/Footer.jsx"
 import Preview from "./Pages/Preview.jsx";
 import SubmitManualGame from "./Pages/SubmitManualGame.jsx";
 import SubmitMultipleGames from "./Pages/SubmitMultipleGames.jsx";
+import SignIn from "./Pages/SignIn.jsx";
+import SignUp from "./Pages/SignUp.jsx";
 
 export default function App() {
     return (
@@ -19,6 +21,8 @@ export default function App() {
                 <Route path="/batch" element={<SubmitMultipleGames />} />
                 <Route path="/edit/:id" element={<Editor />} />
                 <Route path="/preview/:id" element={<Preview />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
             </Routes>
             <Footer/>
         </BrowserRouter>

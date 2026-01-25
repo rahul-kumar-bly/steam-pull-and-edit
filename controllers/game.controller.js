@@ -1,10 +1,13 @@
-import Game from '../models/game.model.js'
-
+import Game from '../models/game.model.js';
+import {cache} from '../utils/cache.js';
 
 export async function addGame (req, res) {
     try {
         const {gameDatabase} = req.body;
         const newGame = await Game.create(gameDatabase);
+        // cache.del("games:all");
+        // console.log('CACHE KEYS:', cache.keys());
+        // console.log('CACHE HAS games:all?', cache.has('games:all'));
         if (newGame){
             console.log('newGame data entry ', newGame);
             return res.status(201).send(newGame);
@@ -31,6 +34,9 @@ export async function addMany (req, res) {
         });
         const filteredGames = gameDatabase.filter(data => data.appId);
         const newGames = await Game.insertMany(filteredGames);
+        // cache.del('games:all');
+        // console.log('CACHE KEYS:', cache.keys());
+        // console.log('CACHE HAS games:all?', cache.has('games:all'));
         if (newGames){
             return res.status(200).send(newGames)
         }
@@ -60,7 +66,15 @@ export async function fetchGame(req, res) {
 
 export async function fetchGames (req, res) {
     try {
+        // const cached = cache.get("games");
+        // if (cached){
+        //     console.log(">>> INFO: cache found");
+        //     return res.status(200).send(cached);
+        // }
         const games = await Game.find()
+        // cache.set("games", games);
+        console.log('CACHE KEYS:', cache.keys());
+        console.log('CACHE HAS games:all?', cache.has('games:all'));
         if (games){
             return res.status(200).send(games)
         } else {
@@ -76,7 +90,7 @@ export async function updateGame (req, res) {
     console.log('updating game')
     try {
         const documentId = req.params.id
-        const game = await Game.findById(documentId)
+        const game = await Game.findById(documentId);
         console.log(`game found`)
         if (game){
             const updatedGame = await Game.findByIdAndUpdate(
@@ -84,6 +98,7 @@ export async function updateGame (req, res) {
                 req.body,
                 {new:true}
             )
+        // cache.del("games:all");
             res.status(200).send(updatedGame)
         } else {
             res.status(404).send('Games not found')
@@ -98,7 +113,10 @@ export async function updateGame (req, res) {
 export async function deleteGame (req, res) {
     try {
         const documentId = req.params.id;
-        const game = await Game.findByIdAndDelete(documentId)
+        const game = await Game.findByIdAndDelete(documentId);
+        // cache.del("games:all");
+        // console.log('CACHE KEYS:', cache.keys());
+        // console.log('CACHE HAS games:all?', cache.has('games:all'));
         res.status(200).send(game);
     } catch (err){
         res.status(404).send('Games not found');
@@ -113,6 +131,9 @@ export async function deleteGames(req, res) {
         const games = await Game.deleteMany({
             _id: {$in:documentIds.selectedIds}
         })
+        // cache.del("games:all");
+        // console.log('CACHE KEYS:', cache.keys());
+        // console.log('CACHE HAS games:all?', cache.has('games:all'));
         res.status(200).json({message:`games deleted successfully ${games.deletedCount}`})
     } catch (err){
         console.log(">>> Error is", err);
