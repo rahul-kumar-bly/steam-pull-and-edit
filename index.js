@@ -16,9 +16,9 @@ app.use(cors({
 dotenv.config()
 app.use(express.json())
 const port = process.env.PORT || 8080
-app.listen(port, ()=> {
-    console.log(`App is listening at ${port}`)
-})
+// app.listen(port, ()=> {
+//     console.log(`App is listening at ${port}`)
+// })
 app.get("/", (req, res) => {
     res.send("Welcome to the app")
 })
@@ -41,3 +41,5 @@ app.use ((err, req, res, next) => {
         message
     })
 })
+
+export default app;
