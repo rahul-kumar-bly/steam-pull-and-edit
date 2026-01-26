@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import TextField from '@mui/material/TextField';
-
+import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { OAuth } from './Components/OAuth';
 
@@ -50,7 +50,7 @@ export default function SignIn() {
                     <Button type="submit" variant="contained">Sign In</Button>
                     <OAuth />
                 </form>
-            Don't have an account? <a href="/signup" className='text-blue-500'>Sign Up</a>
+            Don't have an account? <Link to={"/signup"} className='text-blue-500'>Sign Up</Link>
         </div>
     )
 }

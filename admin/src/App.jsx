@@ -9,6 +9,7 @@ import SubmitManualGame from "./Pages/SubmitManualGame.jsx";
 import SubmitMultipleGames from "./Pages/SubmitMultipleGames.jsx";
 import SignIn from "./Pages/SignIn.jsx";
 import SignUp from "./Pages/SignUp.jsx";
+import PageNotFound from "./Pages/PageNotFound.jsx";
 
 export default function App() {
     return (
@@ -23,6 +24,7 @@ export default function App() {
                 <Route path="/preview/:id" element={<Preview />} />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
+                <Route path="*" element={<PageNotFound />} />
             </Routes>
             <Footer/>
         </BrowserRouter>

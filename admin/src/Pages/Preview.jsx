@@ -1,6 +1,6 @@
 import React from "react";
 import {useState, useEffect} from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams, Link} from "react-router-dom";
 import Screenshots from "./Components/Preview UI/Screenshot";
 
 
@@ -56,7 +56,7 @@ export default function Preview() {
                                     <a href={`#${heading.id}`} className="hover:underline hover:text-blue-500">{heading.textContent.replace(':', '')}</a>
                                 </li>
                             ))}
-                            <li><a onClick={()=> {navigate(`/edit/${params.id}`)}} href="#" className="hover:underline hover:text-blue-500">Back to Editor</a></li>
+                            <li><Link to={`/edit/${params.id}`} href="#" className="hover:underline hover:text-blue-500">Back to Editor</Link></li>
 
                         </ul>
                     )}
