@@ -8,7 +8,11 @@ import authRouter from './routes/auth.route.js';
 import cors from 'cors'
 
 const app = express()
-app.use(cors())
+
+app.use(cors({
+    origin: 'https://steam-pull-and-edit-6vvh.vercel.app/'
+}))
+
 dotenv.config()
 app.use(express.json())
 const port = process.env.PORT || 8080

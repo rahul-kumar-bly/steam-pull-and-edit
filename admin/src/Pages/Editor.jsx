@@ -43,6 +43,7 @@ export default function Editor() {
 
     const params = useParams();
     const navigate = useNavigate();
+    const API_BASE = import.meta.env.VITE_API_BASE || "";
 
     useEffect(() => {
         setLoading(true);
@@ -51,7 +52,8 @@ export default function Editor() {
             if (params.id) {
                 try {
                     console.log('gameid is', gameId);
-                    const res = await fetch(`/api/game/fetch/${params.id}`);
+
+                    const res = await fetch(`${API_BASE}/game/fetch/${params.id}`);
                     if (res.ok){
                         const data = await res.json();
                         console.log(data);
@@ -75,7 +77,7 @@ export default function Editor() {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await fetch(`/api/game/update/${params.id}`, {
+            const res = await fetch(`${API_BASE}/game/update/${params.id}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(steamData),
@@ -126,7 +128,7 @@ export default function Editor() {
 
         setOnAgreeHandler(() => async ()  => {
             try {
-                const res = await fetch(`/api/game/delete/${params.id}`, {
+                const res = await fetch(`${API_BASE}/game/delete/${params.id}`, {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(steamData),

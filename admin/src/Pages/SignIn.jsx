@@ -22,7 +22,8 @@ export default function SignIn() {
     const  handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const res = await fetch("/api/auth/signin", {
+            const API_BASE = import.meta.env.VITE_API_BASE || "";
+            const res = await fetch("${API_BASE}/auth/signin", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

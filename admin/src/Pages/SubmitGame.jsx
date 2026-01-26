@@ -34,13 +34,15 @@ export default function SubmitGame() {
     const [dialogWidth, setDialogWidth] = useState("sm");
     const [gameDatabase, setGameDatabase] = useState([])
 
+    const API_BASE = import.meta.env.VITE_API_BASE || "";
+
     const gameApi = axios.create({
-        baseURL: `/api/game`,
+        baseURL: `${API_BASE}/game`,
         timeout: 3000
     })
 
     const steamApi = axios.create({
-        baseURL: `/api/steam`,
+        baseURL: `${API_BASE}/steam`,
         timeout: 3000
     })
 

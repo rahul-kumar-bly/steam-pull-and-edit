@@ -19,7 +19,8 @@ export default function Preview() {
             async function fetchGame() {
                 if (params.id) {
                     try {
-                        const res = await fetch(`/api/game/fetch/${params.id}`);
+                        const API_BASE = import.meta.env.VITE_API_BASE || "";
+                        const res = await fetch(`${API_BASE}/game/fetch/${params.id}`);
                         if (res.ok){
                             const data = await res.json();
                             console.log(data);

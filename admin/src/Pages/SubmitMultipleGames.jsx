@@ -37,14 +37,15 @@ export default function SubmitMultipleGames() {
     });
     }
 
+    const API_BASE = import.meta.env.VITE_API_BASE || "";
 
     const gameApi = axios.create({
-        baseURL: `/api/game`,
+        baseURL: `${API_BASE}/game`,
         // timeout: 2000 
     })
 
     const steamApi = axios.create({
-        baseURL: `/api/steam`,
+        baseURL: `${API_BASE}/steam`,
         // timeout: 2000 
     })
 

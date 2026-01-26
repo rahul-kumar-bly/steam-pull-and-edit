@@ -22,7 +22,8 @@ export default function SignUp() {
     const  handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const res = await fetch("/api/auth/signup", {
+            const API_BASE = import.meta.env.VITE_API_BASE || "";
+            const res = await fetch("${API_BASE}/auth/signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

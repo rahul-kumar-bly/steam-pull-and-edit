@@ -9,7 +9,8 @@ export function OAuth() {
             const auth = getAuth(app);
             const result =  await signInWithPopup(auth, provider);
             console.log(result);
-            const res = await fetch('/api/auth/google', {
+            const API_BASE = import.meta.env.VITE_API_BASE || "";
+            const res = await fetch('${API_BASE}/auth/google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

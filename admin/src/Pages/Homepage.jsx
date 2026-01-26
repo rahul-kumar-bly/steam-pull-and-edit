@@ -22,7 +22,8 @@ export default function AllGames() {
         async function fetchAllGames () {
             setLoading(true);
             try {
-                const res = await fetch(`/api/game/fetchall`);
+                const API_BASE = import.meta.env.VITE_API_BASE || "";
+                const res = await fetch(`${API_BASE}/game/fetchall`);
                 const games = await res.json()
                 setGames(games)
                 console.log(games)
@@ -66,7 +67,8 @@ export default function AllGames() {
         try {
             setGames(prev => prev.filter(game => !selectedIds.includes(game.appId)));
             setTrigger(true);
-            const res = await fetch(`/api/game/deletemany`, {
+            const API_BASE = import.meta.env.VITE_API_BASE || "";
+            const res = await fetch(`${API_BASE}/game/deletemany`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({selectedIds}),
