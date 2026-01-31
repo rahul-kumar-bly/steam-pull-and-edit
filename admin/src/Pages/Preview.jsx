@@ -3,7 +3,6 @@ import {useState, useEffect} from "react";
 import {useNavigate, useParams, Link} from "react-router-dom";
 import Screenshots from "./Components/Preview UI/Screenshot";
 
-
 export default function Preview() {
     const params = useParams();
     const [steamData, setSteamData] = useState(null);
@@ -36,7 +35,11 @@ export default function Preview() {
                         setLoading(false);
                     }
                 }
-                    setHeadings(document.querySelectorAll('h2:not(#product_desc h2, #toc)' ));
+                const allHeadings = document.querySelectorAll('h2');
+                const filteredHeadings = Array.from(allHeadings).filter(heading =>
+                    !heading.closest('#product_desc') && heading.id !== 'toc'
+                );  
+                setHeadings(filteredHeadings);
 
             }
             fetchGame();
