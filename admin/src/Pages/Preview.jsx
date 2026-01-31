@@ -35,12 +35,14 @@ export default function Preview() {
                         setLoading(false);
                     }
                 }
-                const allHeadings = document.querySelectorAll('h2');
-                const filteredHeadings = Array.from(allHeadings).filter(heading =>
-                    !heading.closest('#product_desc') && heading.id !== 'toc'
-                );  
-                setHeadings(filteredHeadings);
-
+                setTimeout(() => {
+                    const allHeadings = document.querySelectorAll("h2"); 
+                    const filtered = Array.from(allHeadings)
+                        .filter(h => !h.closest("#product_desc") && h.id !== "toc")
+                        .map(h => ({ id: h.id || `heading-${Math.random().toString(36).slice(2)}`, text: h.textContent.replace(":", "") }));
+                        console.log('>>> Filtered Headings:', filtered);
+                    setHeadings(filtered);
+                }, 0);
             }
             fetchGame();
         }, [params.id]);
@@ -52,18 +54,16 @@ export default function Preview() {
             <div className="my-4 flex flex-col items-center ">
                 <div className="my-5 p-4 lg:fixed top-10 left-10">
                     <h2 id="toc" className="text-4xl bg-[rgba(90,136,175,0.4)] rounded-sm p-2">Table of Contents</h2> 
-                    {headings && headings.length > 0 && (
-                        <ul className="list-disc list-inside text-left my-2">
-                            {Array.from(headings).map((heading, index) => (
+                    <ul className="list-disc list-inside text-left my-2">
+                        {headings && headings.length > 0 && (
+                            Array.from(headings).map((heading, index) => (
                                 <li key={index}>
-                                    <a href={`#${heading.id}`} className="hover:underline hover:text-blue-500">{heading.textContent.replace(':', '')}</a>
+                                    <a href={`#${heading.id}`} className="hover:underline hover:text-blue-500">{heading.text}</a>
                                 </li>
-                            ))}
+                            )) 
+                        )}
                             <li><Link to={`/edit/${params.id}`} href="#" className="hover:underline hover:text-blue-500">Back to Editor</Link></li>
-
                         </ul>
-                    )}
-
                 </div>
                 <h1 className="text-4xl" id="Game_Title">
                 {steamData.name}
