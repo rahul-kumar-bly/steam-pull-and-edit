@@ -10,7 +10,10 @@ import cors from 'cors'
 const app = express()
 
 app.use(cors({
-    origin: 'https://steam-pull-and-edit-6vvh.vercel.app'
+    origin: [
+        'https://steam-pull-and-edit-6vvh.vercel.app',
+        'http://localhost:5173',
+    ]
 }))
 
 dotenv.config()

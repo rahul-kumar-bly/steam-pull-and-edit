@@ -3,6 +3,7 @@ import {useNavigate, Link} from "react-router-dom";
 import {Button, ButtonGroup, Checkbox} from "@mui/material";
 import UniversalDialog from "./Components/UniversalDialog";
 import Divider from '@mui/material/Divider';
+import axios from "axios";
 
 export default function AllGames() {
 
@@ -18,15 +19,20 @@ export default function AllGames() {
     const [onAgreeHandler, setOnAgreeHandler] = useState(() => () => {});
     const [mxWidth, setMxWidth] = useState("sm");
 
+    const API_BASE = import.meta.env.VITE_API_BASE || "";
+    
+    const gameAPI = axios.create({
+        baseURL: `${API_BASE}/game`,
+        timeout: 10000,
+    })
+
     useEffect(() => {
         async function fetchAllGames () {
             setLoading(true);
             try {
-                const API_BASE = import.meta.env.VITE_API_BASE || "";
-                const res = await fetch(`${API_BASE}/game/fetchall`);
-                const games = await res.json()
-                setGames(games)
-                console.log(games)
+                const {data} = await gameAPI.get('/fetchall');
+                console.log('data is ====================>', data);
+                setGames(data);
             } catch (error) {
                 setError(error)
             } finally {
@@ -38,13 +44,24 @@ export default function AllGames() {
             fetchAllGames();
         }
         setTrigger(false);
-    }, [trigger])
+    }, [])
 
     const navigateTo = (location) => {
         navigate(location)
     }
 
-    const handleReset = async => {
+
+    const refreshData = async () => {
+        setLoading(true);
+        try {
+            const {data} = gameAPI.get('/fetchall');
+            setGames(data);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const handleReset = () => {
         if (!selectedIds.length){
             console.info('>>> WARNING: Nothing to reset!');
             return;
@@ -57,7 +74,6 @@ export default function AllGames() {
             console.info('>>> WARNING: No selected items to delete!');
             return;
         }
-        setLoading(true);
         e.preventDefault();
         console.log('>>> Delete entries confirmation popup opened')
         setDialogTitle('Confirm Delete');
@@ -65,21 +81,16 @@ export default function AllGames() {
         setDialogOpen(true);
         setOnAgreeHandler(() => async ()  => {
         try {
-            setGames(prev => prev.filter(game => !selectedIds.includes(game.appId)));
-            setTrigger(true);
-            const API_BASE = import.meta.env.VITE_API_BASE || "";
-            const res = await fetch(`${API_BASE}/game/deletemany`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({selectedIds}),
-            });
-            const data = await res.json();
+            setLoading(true);
+            setGames(prev => prev.filter(game => !selectedIds.includes(game._id)));
+            const {data} = await gameAPI.delete('/deletemany', {data: {selectedIds}});
             console.log(">>> UPDATE: deleted successfully", data);
             setSelectedIds([]);
-            setDialogOpen(false);
-            setLoading(false);
+            setTrigger(prev => !prev);
         } catch (err) {
             console.log(">>> ERROR:", err);
+            refreshData();
+        } finally{
             setLoading(false);
             setDialogOpen(false);
         }
@@ -105,11 +116,30 @@ export default function AllGames() {
         })
     }
 
+    const handleSelectAll = () => { 
+        if (selectedIds.length === games.length){
+            console.info('>>> WARNING: All items are already selected!');
+            return;
+        }
+        const allIds = games.map(game => game._id);
+        setSelectedIds(allIds);
+    }
+
+    if (loading) {
+        return (
+        <div className="max-w-lg mx-auto my-5 text-center p-4 text-xl"> 
+            Loading....
+        </div> 
+    )}
+
     if (!games.length) {
         return (
-            <p>No Data found, add something.</p>
-        )
-    }
+        <div className="max-w-lg mx-auto my-5 text-center p-4 text-xl"> 
+            No game found
+        </div> 
+    )}
+
+
 
     console.log('>>> Targets are', selectedIds);
     return (
@@ -146,7 +176,9 @@ export default function AllGames() {
             <div className="flex flex-row p-2 fixed right-0 bottom-0 mx-5 border-1 border-b-0 bg-white">
                 <ButtonGroup className="flex-row gap-1">
                     <Button variant="contained" type="button" color="error" onClick={handleDelete}>Delete Selected</Button>
+                    <Button variant="contained" color="info" type="reset" onClick={handleSelectAll} >Select All</Button>
                     <Button variant="contained" color="info" type="reset" onClick={handleReset} >Clear Selection</Button>
+
                 </ButtonGroup>
             </div>
             )}
