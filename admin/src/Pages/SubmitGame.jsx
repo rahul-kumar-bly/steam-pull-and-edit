@@ -38,12 +38,12 @@ export default function SubmitGame() {
 
     const gameApi = axios.create({
         baseURL: `${API_BASE}/game`,
-        timeout: 3000
+        timeout: 5000
     })
 
     const steamApi = axios.create({
         baseURL: `${API_BASE}/steam`,
-        timeout: 3000
+        timeout: 10000
     })
 
 

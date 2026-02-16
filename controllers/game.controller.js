@@ -1,15 +1,15 @@
 import Game from '../models/game.model.js';
-import {cache} from '../utils/cache.js';
+import redisClient from '../utils/cache.js';
+import {errorHandler} from '../utils/error.js';
 
 export async function addGame (req, res) {
     try {
         const {gameDatabase} = req.body;
         const newGame = await Game.create(gameDatabase);
-        // cache.del("games:all");
-        // console.log('CACHE KEYS:', cache.keys());
-        // console.log('CACHE HAS games:all?', cache.has('games:all'));
         if (newGame){
+            await redisClient.del('games');
             console.log('newGame data entry ', newGame);
+            await redisClient.set(`game:${newGame._id}`, JSON.stringify(newGame), {EX: 60});
             return res.status(201).send(newGame);
         }
     } catch (err){
@@ -34,9 +34,6 @@ export async function addMany (req, res) {
         });
         const filteredGames = gameDatabase.filter(data => data.appId);
         const newGames = await Game.insertMany(filteredGames);
-        // cache.del('games:all');
-        // console.log('CACHE KEYS:', cache.keys());
-        // console.log('CACHE HAS games:all?', cache.has('games:all'));
         if (newGames){
             return res.status(200).send(newGames)
         }
@@ -53,36 +50,37 @@ export async function addMany (req, res) {
 
 // https://mongoosejs.com/docs/queries.html
 
-export async function fetchGame(req, res) {
+export async function fetchGame(req, res, next) {
     const documentId = req.params.id
     try{
+        const cachedKey = await redisClient.get(`game:${documentId}`);
+        if (cachedKey){
+            console.log(">>> INFO: using cached data for", documentId);
+            return res.status(200).json(JSON.parse(cachedKey)); 
+        }
         const game = await Game.findById(documentId)
-        return res.status(200).send(game)
+        if (!game) return res.status(404).send('Game not found');
+        await redisClient.set(`game:${documentId}`, JSON.stringify(game), {EX:60});
+        return res.status(200).json(game)
     } catch(err){
         console.log(err);
-        return res.send(err.message)
+        return next(err);
     }
 }
 
-export async function fetchGames (req, res) {
+export async function fetchGames (req, res, next) {
     try {
-        // const cached = cache.get("games");
-        // if (cached){
-        //     console.log(">>> INFO: cache found");
-        //     return res.status(200).send(cached);
-        // }
-        const games = await Game.find()
-        // cache.set("games", games);
-        console.log('CACHE KEYS:', cache.keys());
-        console.log('CACHE HAS games:all?', cache.has('games:all'));
-        if (games){
-            return res.status(200).send(games)
-        } else {
-            return res.status(404).send('Games not found')
+        const cachedGames = await redisClient.get('games');
+        if (cachedGames){
+            console.log(cachedGames);
+            return res.status(200).send(JSON.parse(cachedGames));
         }
+        const games = await Game.find();
+            await redisClient.set('games', JSON.stringify(games), {EX: 60});
+            return res.status(200).json(games)
     } catch(err){
         console.log(err);
-        return res.send(err.message)
+        return next(errorHandler(500, err));
     }
 }
 
@@ -98,8 +96,9 @@ export async function updateGame (req, res) {
                 req.body,
                 {new:true}
             )
-        // cache.del("games:all");
             res.status(200).send(updatedGame)
+            redisClient.del(`games`);
+            redisClient.del(`game:${documentId}`);
         } else {
             res.status(404).send('Games not found')
         }
@@ -110,16 +109,15 @@ export async function updateGame (req, res) {
     }
 }
 
-export async function deleteGame (req, res) {
+export async function deleteGame (req, res, next) {
     try {
         const documentId = req.params.id;
         const game = await Game.findByIdAndDelete(documentId);
-        // cache.del("games:all");
-        // console.log('CACHE KEYS:', cache.keys());
-        // console.log('CACHE HAS games:all?', cache.has('games:all'));
+        redisClient.del(`games`);
+        redisClient.del(`game:${documentId}`);
         res.status(200).send(game);
     } catch (err){
-        res.status(404).send('Games not found');
+        next(errorHandler(404, err));
     }
 
 }
@@ -128,15 +126,18 @@ export async function deleteGames(req, res) {
     try{
         const documentIds = req.body;
         console.log(">>> Selected IDs are", documentIds);
-        const games = await Game.deleteMany({
+        const result = await Game.deleteMany({
             _id: {$in:documentIds.selectedIds}
-        })
-        // cache.del("games:all");
-        // console.log('CACHE KEYS:', cache.keys());
-        // console.log('CACHE HAS games:all?', cache.has('games:all'));
-        res.status(200).json({message:`games deleted successfully ${games.deletedCount}`})
+        })    
+        const gameKeys = documentIds.selectedIds.map(id=> `game:${id}`);
+        await redisClient.del('games', ...gameKeys);
+        console.log(">>> DELETE: deleted count", result.deletedCount);        
+        res.status(200).json({message:`games deleted successfully ${result.deletedCount}`})
     } catch (err){
         console.log(">>> Error is", err);
         res.status(404).send('Games not found');
     }
 }
+
+
+

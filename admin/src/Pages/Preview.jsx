@@ -48,7 +48,12 @@ export default function Preview() {
         }, [params.id]);
 
     return (
+
         <div className="flex flex-col bg-[#151515] text-white  text-center">
+
+            {loading && (
+                <div>Loading...</div> 
+            )} 
         {
             steamData && (
             <div className="my-4 flex flex-col items-center ">
